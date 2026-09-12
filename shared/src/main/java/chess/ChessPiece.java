@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -10,7 +11,12 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    private final ChessGame.TeamColor TeamColor;
+    private final PieceType PieceType;
+    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type)
+    {
+        TeamColor = pieceColor;
+        PieceType = type;
     }
 
     /**
@@ -28,15 +34,40 @@ public class ChessPiece {
     /**
      * @return Which team this chess piece belongs to
      */
-    public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+    public ChessGame.TeamColor getTeamColor()
+    {
+        return TeamColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
-    public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+    public PieceType getPieceType()
+    {
+        return PieceType;
+    }
+
+    /**
+     * Compares the chess piece against another object to determine if they are equal.
+     * @param o The reference object with which to compare.
+     * @return True if the objects are the same, False if the objects are different.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return TeamColor == that.TeamColor && PieceType == that.PieceType;
+    }
+
+    /**
+     * Generates a hashcode consisting of TeamColor and PieceType.
+     * @return The generated hashcode.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(TeamColor, PieceType);
     }
 
     /**
