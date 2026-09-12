@@ -86,6 +86,8 @@ public class ChessBoard {
         row--;
         col--; // to account for non-zero indexing
         int index = (row * 8) + col; // multiply row by 8 because there are 8 columns per row (ex. row 1 col 4: (8 * 1) + 4 = 12)
+        if(index > BoardPositions.length - 1 || index < 0)
+            return null;
         return BoardPositions[index];
     }
 
