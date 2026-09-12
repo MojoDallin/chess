@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -13,6 +15,8 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor TeamColor;
     private final PieceType PieceType;
+    private boolean HasMoved = false;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type)
     {
         TeamColor = pieceColor;
@@ -54,8 +58,63 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition)
+    {
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        int currentRow = myPosition.getRow();
+        int currentCol = myPosition.getColumn();
+
+        switch(PieceType)
+        {
+            case PAWN:
+            {
+                int nextRow = TeamColor == ChessGame.TeamColor.WHITE ? currentRow - 1 : currentRow + 1; // -1 = white, +1 = black
+
+                if(board.getPositionAt(nextRow, currentCol).getCurrentPiece() == null) // can move forward if space in front is not occupied
+                {
+                    possibleMoves.add(new ChessMove(myPosition, new ChessPosition(nextRow, currentCol), null));
+                    if(!HasMoved) // if it's the first move, then add an extra space
+                    {
+                        int nextNextRow = TeamColor == ChessGame.TeamColor.WHITE ? nextRow + 1 : nextRow - 1;
+                        if(board.getPositionAt(nextNextRow, currentCol).getCurrentPiece() == null)
+                            possibleMoves.add(new ChessMove(myPosition, new ChessPosition(nextNextRow, currentCol), null));
+                    }
+                }
+                for(int i = -1; i < 2; i += 2) // diagonal moves
+                {
+                    int diagonalCol = currentCol + i;
+                    if(diagonalCol > 0 && diagonalCol < 9) // checks for bounds
+                        if (board.getPositionAt(nextRow, diagonalCol).getCurrentPiece() != null) // can move diagonally if either (or both) spaces ARE occupied
+                            possibleMoves.add(new ChessMove(myPosition, new ChessPosition(nextRow, currentCol + i), null));
+                }
+            }
+            case ROOK:
+            {
+                for(int i = -1; i < 2; i += 2) // vertical
+                {
+                    int nextPos = currentRow + i;
+                    ChessPosition newPosition = board.getPositionAt(nextPos, currentCol);
+                    while (newPosition != null && newPosition.getCurrentPiece() == null) // next position is in bounds and not occupied
+                    {
+                        possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                        nextPos += i;
+                        newPosition = board.getPositionAt(nextPos, currentCol);
+                    }
+                }
+                for(int i = -1; i < 2; i += 2) // horizontal
+                {
+                    int nextPos = currentCol + i;
+                    ChessPosition newPosition = board.getPositionAt(nextPos, currentCol);
+                    while(newPosition != null && newPosition.getCurrentPiece() != null)
+                    {
+                        possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                        nextPos += i;
+                        newPosition = board.getPositionAt(nextPos, currentCol);
+                    }
+                }
+            }
+        }
+        return possibleMoves;
     }
 
     /**
