@@ -48,6 +48,17 @@ public class ChessPiece {
     }
 
     /**
+     * Calculates all the positions a chess piece can move to
+     * Does not take into account moves that are illegal due to leaving the king in
+     * danger
+     *
+     * @return Collection of valid moves
+     */
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        throw new RuntimeException("Not implemented");
+    }
+
+    /**
      * Compares the chess piece against another object to determine if they are equal.
      * @param o The reference object with which to compare.
      * @return True if the objects are the same, False if the objects are different.
@@ -71,13 +82,21 @@ public class ChessPiece {
     }
 
     /**
-     * Calculates all the positions a chess piece can move to
-     * Does not take into account moves that are illegal due to leaving the king in
-     * danger
-     *
-     * @return Collection of valid moves
+     * Gets the string representation of the piece.
+     * @return The piece, as a string. Lowercase means black, uppercase means white; each letter stands for the respective piece which starts with it, save for K and N: K represents King, N represents Knight.
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+    @Override
+    public String toString() {
+        char returnChar = ' '; // empty if no piece
+        switch (PieceType)
+        {
+            case ROOK -> returnChar = 'r';
+            case KNIGHT -> returnChar = 'n';
+            case BISHOP -> returnChar = 'b';
+            case KING -> returnChar = 'k';
+            case QUEEN -> returnChar = 'q';
+            case PAWN -> returnChar = 'p';
+        }
+        return TeamColor == ChessGame.TeamColor.BLACK ? String.valueOf(returnChar) : String.valueOf(Character.toUpperCase(returnChar)); // convert to string to return
     }
 }
