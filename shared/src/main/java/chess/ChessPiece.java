@@ -91,7 +91,24 @@ public class ChessPiece {
             }
             case KNIGHT:
             {
-
+                for(int i = -1; i < 2; i++) // vertical
+                {
+                    for(int j = -1; j < 2; j += 2)
+                    {
+                        ChessPosition newPosition = board.getPositionAt(myPosition.getRow() + (i * 2), myPosition.getColumn() + j);
+                        if(newPosition != null && newPosition.getCurrentPiece() == null)
+                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                    }
+                }
+                for(int i = -1; i < 2; i += 2) // horizontal
+                {
+                    for(int j = -1; j < 2; j += 2)
+                    {
+                        ChessPosition newPosition = board.getPositionAt(myPosition.getRow() + j, myPosition.getColumn() + (i * 2));
+                        if(newPosition != null && newPosition.getCurrentPiece() == null)
+                            possibleMoves.add(new ChessMove(myPosition, newPosition, null));
+                    }
+                }
             }
             case BISHOP:
             {
@@ -185,7 +202,8 @@ public class ChessPiece {
             for(int j = -1; j < 2; j+= 2)
             {
                 ChessPosition newPosition = board.getPositionAt(oldPosition.getRow() + j, oldPosition.getColumn() + i);
-                while (newPosition != null && newPosition.getCurrentPiece() == null) {
+                while (newPosition != null && newPosition.getCurrentPiece() == null)
+                {
                     diagonalMoves.add(new ChessMove(oldPosition, newPosition, null));
                     newPosition = board.getPositionAt(newPosition.getRow() + j, newPosition.getColumn() + i);
                 }
