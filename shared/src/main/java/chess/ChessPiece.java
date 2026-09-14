@@ -95,7 +95,7 @@ public class ChessPiece {
             }
             case BISHOP:
             {
-
+                possibleMoves.addAll(getDiagonalMoves(board, myPosition));
             }
             case KING:
             {
@@ -105,6 +105,7 @@ public class ChessPiece {
             {
                 possibleMoves.addAll(getEightMovesCenteredOnPiece(board, myPosition)); // king moves
                 possibleMoves.addAll(getHorizontalAndVerticalMoves(board, myPosition)); // rook moves
+                possibleMoves.addAll(getDiagonalMoves(board, myPosition)); // bishop moves
             }
         }
 
@@ -173,6 +174,25 @@ public class ChessPiece {
         }
 
         return verticalHorizontalMoves;
+    }
+
+    private HashSet<ChessMove> getDiagonalMoves(ChessBoard board, ChessPosition oldPosition)
+    {
+        HashSet<ChessMove> diagonalMoves = new HashSet<>();
+
+        for(int i = -1; i < 2; i += 2) // right
+        {
+            for(int j = -1; j < 2; j+= 2)
+            {
+                ChessPosition newPosition = board.getPositionAt(oldPosition.getRow() + j, oldPosition.getColumn() + i);
+                while (newPosition != null && newPosition.getCurrentPiece() == null) {
+                    diagonalMoves.add(new ChessMove(oldPosition, newPosition, null));
+                    newPosition = board.getPositionAt(newPosition.getRow() + j, newPosition.getColumn() + i);
+                }
+            }
+        }
+
+        return diagonalMoves;
     }
 
     /**
