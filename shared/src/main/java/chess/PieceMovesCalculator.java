@@ -115,22 +115,24 @@ public class PieceMovesCalculator
     public static HashSet<ChessMove> calculatePawnMoves(ChessBoard board, ChessPosition oldPosition)
     {
         HashSet<ChessMove> pawnMoves = new HashSet<>();
-        ChessPiece piece = board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece();
+        int currentRow = oldPosition.getRow();
+        int currentCol = oldPosition.getColumn();
+        ChessPiece piece = board.getPositionAt(currentRow, currentCol).getCurrentPiece();
         int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
-        boolean pawnHasMoved = direction == 1 ? oldPosition.getRow() != 2 : oldPosition.getRow() != 7;
-        ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + direction, oldPosition.getColumn());
+        boolean pawnHasMoved = direction == 1 ? currentRow != 2 : currentRow != 7;
+        ChessPosition nextPosition = board.getPositionAt(currentRow + direction, currentCol);
         if(nextPosition.isOccupied(piece) == 0) // unoccupied by anything
-            pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(oldPosition.getRow() + direction, oldPosition.getColumn()), null));
+            pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(currentRow + direction, currentCol), null));
         if(!pawnHasMoved && pawnMoves.size() == 1) // add another movement if pawn has not moved AND square directly in front is not blocked
         {
             nextPosition = board.getPositionAt(nextPosition.getRow() + direction, nextPosition.getColumn());
             if(nextPosition.isOccupied(piece) == 0)
-                pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(oldPosition.getRow() + (direction * 2), oldPosition.getColumn()), null));
+                pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(currentRow + (direction * 2), currentCol), null));
         }
         // diagonal moves
         for(int i = -1; i < 2; i += 2)
         {
-            ChessPosition diagonalPosition = board.getPositionAt(oldPosition.getRow() + direction, oldPosition.getColumn() + i);
+            ChessPosition diagonalPosition = board.getPositionAt(currentRow + direction, currentCol + i);
             if(diagonalPosition != null && diagonalPosition.isOccupied(piece) == 1) // occupied by enemy
                 pawnMoves.add(new ChessMove(oldPosition, diagonalPosition, null));
         }
@@ -147,6 +149,37 @@ public class PieceMovesCalculator
             return promotionMoves; // only return promotion moves
         }
         return pawnMoves;
+    }
+
+    /**
+     * Grabs all the moves the knight can move to.
+     * @param board The chess board.
+     * @param oldPosition The 'old', or current position of the piece to calculate moves for.
+     * @return A list of ChessMove(s) centered on the current piece.
+     */
+    public static HashSet<ChessMove> calculateKnightMoves(ChessBoard board, ChessPosition oldPosition)
+    {
+        HashSet<ChessMove> knightMoves = new HashSet<>();
+        ChessPiece piece = board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece();
+        for(int i = -1; i < 2; i += 2) // vertical
+        {
+            for(int j = -1; j < 2; j += 2)
+            {
+                ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + (i * 2), oldPosition.getColumn() + j);
+                if(nextPosition != null && nextPosition.isOccupied(piece) < 2)
+                    knightMoves.add(new ChessMove(oldPosition, nextPosition, null));
+            }
+        }
+        for(int i = -1; i < 2; i += 2) // horizontal
+        {
+            for(int j = -1; j < 2; j += 2)
+            {
+                ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + j, oldPosition.getColumn() + (i * 2));
+                if(nextPosition != null && nextPosition.isOccupied(piece) < 2)
+                    knightMoves.add(new ChessMove(oldPosition, nextPosition, null));
+            }
+        }
+        return knightMoves;
     }
 
 }
