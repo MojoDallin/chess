@@ -14,21 +14,24 @@ public class PieceMovesCalculator
     public static HashSet<ChessMove> calculateKingMoves(ChessBoard board, ChessPosition oldPosition)
     {
         HashSet<ChessMove> centeredMoves = new HashSet<>();
-
+        ChessPiece piece = board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece();
         for(int i = 1; i > -2; i--)
-            for(int j = 1; j > -2; j--)
+        {
+            for (int j = 1; j > -2; j--)
             {
                 int newRow = oldPosition.getRow() - i;
                 int newCol = oldPosition.getColumn() - j;
-                if(newRow > 0 && newRow < 9 && newCol > 0 && newCol < 9) // both in bounds
+                if (newRow > 0 && newRow < 9 && newCol > 0 && newCol < 9) // both in bounds
                 {
                     ChessPosition newPosition = board.getPositionAt(newRow, newCol);
-                    int occupiedStatus = newPosition.isOccupied(board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece());
-                    if(!oldPosition.equals(newPosition) && occupiedStatus < 2) // do not add current square to possible moves and do not add pieces occupied by same team
+                    int occupiedStatus = newPosition.isOccupied(piece);
+                    if (!oldPosition.equals(newPosition) && occupiedStatus < 2) // do not add current square to possible moves and do not add pieces occupied by same team
+                    {
                         centeredMoves.add(new ChessMove(oldPosition, newPosition, null));
+                    }
                 }
             }
-
+        }
         return centeredMoves;
     }
 
@@ -49,9 +52,13 @@ public class PieceMovesCalculator
             ChessPosition nextPosition;
             int offset = i % 2 == 0 ? 1 : -1;
             if(i < 2)
+            {
                 nextPosition = board.getPositionAt(currentRow + offset, currentCol);
+            }
             else
+            {
                 nextPosition = board.getPositionAt(currentRow, currentCol + offset);
+            }
             while(nextPosition != null)
             {
                 int isOccupied = nextPosition.isOccupied(board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece());
@@ -59,14 +66,22 @@ public class PieceMovesCalculator
                 {
                     verticalHorizontalMoves.add(new ChessMove(oldPosition, nextPosition, null));
                     if (isOccupied == 1)
+                    {
                         break;
+                    }
                 }
                 else
+                {
                     break;
+                }
                 if(i < 2)
+                {
                     nextPosition = board.getPositionAt(nextPosition.getRow() + offset, currentCol);
+                }
                 else
+                {
                     nextPosition = board.getPositionAt(currentRow, nextPosition.getColumn() + offset);
+                }
             }
         }
 
@@ -95,10 +110,14 @@ public class PieceMovesCalculator
                 {
                     diagonalMoves.add(new ChessMove(oldPosition, nextPosition, null));
                     if(isOccupied == 1)
+                    {
                         break;
+                    }
                 }
                 else
+                {
                     break;
+                }
                 nextPosition = board.getPositionAt(nextPosition.getRow() + offsetRow, nextPosition.getColumn() + offsetCol);
             }
         }
@@ -122,19 +141,25 @@ public class PieceMovesCalculator
         boolean pawnHasMoved = direction == 1 ? currentRow != 2 : currentRow != 7;
         ChessPosition nextPosition = board.getPositionAt(currentRow + direction, currentCol);
         if(nextPosition.isOccupied(piece) == 0) // unoccupied by anything
+        {
             pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(currentRow + direction, currentCol), null));
+        }
         if(!pawnHasMoved && pawnMoves.size() == 1) // add another movement if pawn has not moved AND square directly in front is not blocked
         {
             nextPosition = board.getPositionAt(nextPosition.getRow() + direction, nextPosition.getColumn());
             if(nextPosition.isOccupied(piece) == 0)
+            {
                 pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(currentRow + (direction * 2), currentCol), null));
+            }
         }
         // diagonal moves
         for(int i = -1; i < 2; i += 2)
         {
             ChessPosition diagonalPosition = board.getPositionAt(currentRow + direction, currentCol + i);
             if(diagonalPosition != null && diagonalPosition.isOccupied(piece) == 1) // occupied by enemy
+            {
                 pawnMoves.add(new ChessMove(oldPosition, diagonalPosition, null));
+            }
         }
         // promotions
         if((direction == 1 && nextPosition.getRow() == 8) || (direction == -1 && nextPosition.getRow() == 1))
@@ -143,8 +168,10 @@ public class PieceMovesCalculator
             for(ChessMove move : pawnMoves)
             {
                 for(ChessPiece.PieceType newPieceType : chess.ChessPiece.PieceType.values())
-                    if(newPieceType != ChessPiece.PieceType.KING && newPieceType != ChessPiece.PieceType.PAWN)
+                    if(newPieceType != ChessPiece.PieceType.KING && newPieceType != ChessPiece.PieceType.PAWN) // cant promote to either
+                    {
                         promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), newPieceType));
+                    }
             }
             return promotionMoves; // only return promotion moves
         }
@@ -167,7 +194,9 @@ public class PieceMovesCalculator
             {
                 ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + (i * 2), oldPosition.getColumn() + j);
                 if(nextPosition != null && nextPosition.isOccupied(piece) < 2)
+                {
                     knightMoves.add(new ChessMove(oldPosition, nextPosition, null));
+                }
             }
         }
         for(int i = -1; i < 2; i += 2) // horizontal
@@ -176,7 +205,9 @@ public class PieceMovesCalculator
             {
                 ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + j, oldPosition.getColumn() + (i * 2));
                 if(nextPosition != null && nextPosition.isOccupied(piece) < 2)
+                {
                     knightMoves.add(new ChessMove(oldPosition, nextPosition, null));
+                }
             }
         }
         return knightMoves;

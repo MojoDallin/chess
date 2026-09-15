@@ -10,21 +10,21 @@ import java.util.Objects;
  */
 public class ChessPosition {
 
-    private final int Row;
-    private final int Column;
-    private ChessPiece CurrentPiece = null;
+    private final int row;
+    private final int column;
+    private ChessPiece currentPiece = null;
 
     public ChessPosition(int row, int col)
     {
-        Row = row;
-        Column = col;
+        this.row = row;
+        column = col;
     }
 
     public ChessPosition(int row, int col, ChessPiece piece)
     {
-        Row = row - 1; // - 1 to account for non-zero indexing
-        Column = col - 1;
-        CurrentPiece = piece;
+        this.row = row - 1; // - 1 to account for non-zero indexing
+        column = col - 1;
+        currentPiece = piece;
     }
 
     /**
@@ -33,7 +33,7 @@ public class ChessPosition {
      */
     public int getRow()
     {
-        return Row;
+        return row;
     }
 
     /**
@@ -42,32 +42,36 @@ public class ChessPosition {
      */
     public int getColumn()
     {
-        return Column;
+        return column;
     }
 
     /**
      * Gets the current chess piece on the position, if there is any.
      * @return The ChessPiece object that is currently on the object; if there is no piece, then returns null.
      */
-    public ChessPiece getCurrentPiece() { return CurrentPiece; }
+    public ChessPiece getCurrentPiece() { return currentPiece; }
 
     /**
      * Adds a chess piece to the position. Does NOT check if piece is currently occupied.
      * @param newPiece The piece to add.
      */
-    public void addPiece(ChessPiece newPiece) { CurrentPiece = newPiece; }
+    public void addPiece(ChessPiece newPiece) { currentPiece = newPiece; }
 
     /**
      * Removes the current chess piece from the position.
      */
-    public void removePiece() { CurrentPiece = null; }
+    public void removePiece() { currentPiece = null; }
 
     public int isOccupied(ChessPiece piece)
     {
-        if(CurrentPiece == null)
+        if(currentPiece == null)
+        {
             return 0; // 0 if unoccupied
-        if(piece.getTeamColor() != CurrentPiece.getTeamColor())
+        }
+        if(piece.getTeamColor() != currentPiece.getTeamColor())
+        {
             return 1; // 1 if occupied by DIFFERENT team color
+        }
         return 2; // 2 if occupied by SAME team color
     }
 
@@ -83,17 +87,17 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return Row == that.Row && Column == that.Column && Objects.equals(CurrentPiece, that.CurrentPiece);
+        return row == that.row && column == that.column && Objects.equals(currentPiece, that.currentPiece);
     }
 
     /**
-     * Generates a hashcode consisting of Row, Column, and CurrentPiece..
+     * Generates a hashcode consisting of Row, column, and CurrentPiece.
      * @return The generated hashcode.
      */
     @Override
     public int hashCode()
     {
-        return Objects.hash(Row, Column, CurrentPiece);
+        return Objects.hash(row, column, currentPiece);
     }
 
     /**
@@ -101,5 +105,5 @@ public class ChessPosition {
      * @return A string consisting of [row, col].
      */
     @Override
-    public String toString() { return String.format("[%d,%d]", Row, Column); }
+    public String toString() { return String.format("[%d,%d]", row, column); }
 }

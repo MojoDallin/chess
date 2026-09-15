@@ -10,12 +10,14 @@ import java.util.Arrays;
  */
 public class ChessBoard {
 
-    private final ChessPosition[][] BoardPositions = new ChessPosition[8][8];
+    private final ChessPosition[][] boardPositions = new ChessPosition[8][8];
 
     public ChessBoard()
     {
         for(int i = 0; i < 64; i++) // 8 rows x 8 columns = 64 total positions
-            BoardPositions[i/8][i%8] = new ChessPosition(i/8 + 1, i%8 + 1); // i%8 gets remainder, i/8 gets floored value; + 1 to account for non-zero indexing
+        {
+            boardPositions[i / 8][i % 8] = new ChessPosition(i / 8 + 1, i % 8 + 1); // + 1 to account for non-zero indexing
+        }
     }
 
     /**
@@ -45,7 +47,9 @@ public class ChessBoard {
     public void resetBoard() {
         // clear
         for(int i = 0; i < 64; i++)
-            getPositionAt(i/8 + 1, i%8 + 1).removePiece();
+        {
+            getPositionAt(i / 8 + 1, i % 8 + 1).removePiece();
+        }
         // add pieces
         for(int i = 0; i < 2; i++)
         {
@@ -56,20 +60,20 @@ public class ChessBoard {
             ChessPiece knight = new ChessPiece(color, ChessPiece.PieceType.KNIGHT);
             ChessPiece bishop = new ChessPiece(color, ChessPiece.PieceType.BISHOP);
 
-            BoardPositions[offset][0].addPiece(rook);
-            BoardPositions[offset][1].addPiece(knight);
-            BoardPositions[offset][2].addPiece(bishop);
-            BoardPositions[offset][3].addPiece(new ChessPiece(color, ChessPiece.PieceType.QUEEN)); // only 1 queen and king
-            BoardPositions[offset][4].addPiece(new ChessPiece(color, ChessPiece.PieceType.KING));
-            BoardPositions[offset][5].addPiece(bishop);
-            BoardPositions[offset][6].addPiece(knight);
-            BoardPositions[offset][7].addPiece(rook);
+            boardPositions[offset][0].addPiece(rook);
+            boardPositions[offset][1].addPiece(knight);
+            boardPositions[offset][2].addPiece(bishop);
+            boardPositions[offset][3].addPiece(new ChessPiece(color, ChessPiece.PieceType.QUEEN)); // only 1 queen and king
+            boardPositions[offset][4].addPiece(new ChessPiece(color, ChessPiece.PieceType.KING));
+            boardPositions[offset][5].addPiece(bishop);
+            boardPositions[offset][6].addPiece(knight);
+            boardPositions[offset][7].addPiece(rook);
 
             ChessPiece pawn = new ChessPiece(color, ChessPiece.PieceType.PAWN); // create pawn only once per color
             offset = color == ChessGame.TeamColor.WHITE ? 1 : 6;
             for(int j = 0; j < 8; j++) // 8 total pawns
             {
-                BoardPositions[offset][j].addPiece(pawn);
+                boardPositions[offset][j].addPiece(pawn);
             }
 
         }
@@ -86,15 +90,17 @@ public class ChessBoard {
         row--;
         col--; // to account for non-zero indexing
         if(row > 7 || row < 0 || col > 7 || col < 0)
+        {
             return null;
-        return BoardPositions[row][col];
+        }
+        return boardPositions[row][col];
     }
 
     /**
      * Gets all the positions in the chess board.
      * @return An array of positions;
      */
-    public ChessPosition[][] getBoardPositions() { return BoardPositions; }
+    public ChessPosition[][] getBoardPositions() { return boardPositions; }
 
     /**
      * Compares the chess board against another object to determine if they are equal.
@@ -103,11 +109,12 @@ public class ChessBoard {
      */
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass())
+        {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(BoardPositions, that.BoardPositions);
+        return Arrays.deepEquals(boardPositions, that.boardPositions);
     }
 
     /**
@@ -115,7 +122,5 @@ public class ChessBoard {
      * @return The generated hashcode.
      */
     @Override
-    public int hashCode() {
-        return Arrays.deepHashCode(BoardPositions);
-    }
+    public int hashCode() { return Arrays.deepHashCode(boardPositions); }
 }

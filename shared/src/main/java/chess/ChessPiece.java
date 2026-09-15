@@ -10,14 +10,14 @@ import java.util.*;
  */
 public class ChessPiece {
 
-    private final ChessGame.TeamColor TeamColor;
-    private final PieceType PieceType;
-    private boolean HasMoved = false;
+    private final ChessGame.TeamColor teamColor;
+    private final PieceType pieceType;
+    private boolean hasMoved = false;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type)
     {
-        TeamColor = pieceColor;
-        PieceType = type;
+        teamColor = pieceColor;
+        pieceType = type;
     }
 
     /**
@@ -35,17 +35,14 @@ public class ChessPiece {
     /**
      * @return Which team this chess piece belongs to
      */
-    public ChessGame.TeamColor getTeamColor()
-    {
-        return TeamColor;
-    }
+    public ChessGame.TeamColor getTeamColor() { return teamColor; }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType()
     {
-        return PieceType;
+        return pieceType;
     }
 
     /**
@@ -59,7 +56,7 @@ public class ChessPiece {
     {
         HashSet<ChessMove> possibleMoves = new HashSet<>(); // HashSet because we don't want duplicate positions, and they do not need to be ordered
 
-        switch(PieceType)
+        switch(pieceType)
         {
             case PAWN:
             {
@@ -94,9 +91,11 @@ public class ChessPiece {
                 break;
             }
         }
-        HasMoved = true;
+        hasMoved = true;
         for(ChessMove move : possibleMoves)
+        {
             move.getEndPosition().addPiece(null);
+        }
         return possibleMoves;
     }
 
@@ -104,7 +103,7 @@ public class ChessPiece {
      * Gets the HasMoved field from ChessPiece.
      * @return The boolean HasMoved field, determining if the piece has moved (mainly for castling).
      */
-    public boolean hasMoved() { return HasMoved; }
+    public boolean hasMoved() { return hasMoved; }
 
     /**
      * Compares the chess piece against another object to determine if they are equal.
@@ -113,11 +112,12 @@ public class ChessPiece {
      */
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || getClass() != o.getClass())
+        {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return TeamColor == that.TeamColor && PieceType == that.PieceType;
+        return teamColor == that.teamColor && pieceType == that.pieceType;
     }
 
     /**
@@ -126,17 +126,19 @@ public class ChessPiece {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(TeamColor, PieceType);
+        return Objects.hash(teamColor, pieceType);
     }
 
     /**
      * Gets the string representation of the piece.
-     * @return The piece, as a string. Lowercase means black, uppercase means white; each letter stands for the respective piece which starts with it, save for K and N: K represents King, N represents Knight.
+     * @return The piece, as a string. Lowercase means black, uppercase means white;
+     *         each letter stands for the respective piece which starts with it, save for K and N: K represents King, N represents Knight.
      */
     @Override
     public String toString() {
         char returnChar = ' '; // empty if no piece
-        switch (PieceType)
+
+        switch (pieceType)
         {
             case ROOK -> returnChar = 'r';
             case KNIGHT -> returnChar = 'n';
@@ -145,6 +147,9 @@ public class ChessPiece {
             case QUEEN -> returnChar = 'q';
             case PAWN -> returnChar = 'p';
         }
-        return TeamColor == ChessGame.TeamColor.BLACK ? String.valueOf(returnChar) : String.valueOf(Character.toUpperCase(returnChar)); // convert to string to return
+
+        if(teamColor == ChessGame.TeamColor.BLACK)
+            return String.valueOf(returnChar);
+        return String.valueOf(Character.toUpperCase(returnChar)); // convert to string to return
     }
 }
