@@ -25,7 +25,7 @@ public class PieceMovesCalculator
                 {
                     ChessPosition newPosition = board.getPositionAt(newRow, newCol);
                     int occupiedStatus = newPosition.isOccupied(piece);
-                    if (!oldPosition.equals(newPosition) && occupiedStatus < 2) // do not add current square to possible moves and do not add pieces occupied by same team
+                    if (!oldPosition.equals(newPosition) && occupiedStatus < 2) // do not add current square
                     {
                         centeredMoves.add(new ChessMove(oldPosition, newPosition, null));
                     }
@@ -168,10 +168,12 @@ public class PieceMovesCalculator
             for(ChessMove move : pawnMoves)
             {
                 for(ChessPiece.PieceType newPieceType : chess.ChessPiece.PieceType.values())
-                    if(newPieceType != ChessPiece.PieceType.KING && newPieceType != ChessPiece.PieceType.PAWN) // cant promote to either
+                {
+                    if (newPieceType != ChessPiece.PieceType.KING && newPieceType != ChessPiece.PieceType.PAWN) // cant promote to either
                     {
                         promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), newPieceType));
                     }
+                }
             }
             return promotionMoves; // only return promotion moves
         }

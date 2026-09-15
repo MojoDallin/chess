@@ -99,11 +99,11 @@ public class ChessPiece {
         return possibleMoves;
     }
 
-    /**
-     * Gets the HasMoved field from ChessPiece.
-     * @return The boolean HasMoved field, determining if the piece has moved (mainly for castling).
-     */
-    public boolean hasMoved() { return hasMoved; }
+//    /**
+//     * Gets the HasMoved field from ChessPiece.
+//     * @return The boolean HasMoved field, determining if the piece has moved (mainly for castling).
+//     */
+//    public boolean hasMoved() { return hasMoved; }
 
     /**
      * Compares the chess piece against another object to determine if they are equal.
@@ -149,7 +149,9 @@ public class ChessPiece {
         }
 
         if(teamColor == ChessGame.TeamColor.BLACK)
+        {
             return String.valueOf(returnChar);
+        }
         return String.valueOf(Character.toUpperCase(returnChar)); // convert to string to return
     }
 }
