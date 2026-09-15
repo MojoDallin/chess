@@ -83,17 +83,17 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return Row == that.Row && Column == that.Column;
+        return Row == that.Row && Column == that.Column && Objects.equals(CurrentPiece, that.CurrentPiece);
     }
 
     /**
-     * Generates a hashcode consisting of Row and Column.
+     * Generates a hashcode consisting of Row, Column, and CurrentPiece..
      * @return The generated hashcode.
      */
     @Override
     public int hashCode()
     {
-        return Objects.hash(Row, Column);
+        return Objects.hash(Row, Column, CurrentPiece);
     }
 
     /**

@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -97,6 +96,11 @@ public class ChessBoard {
      */
     public ChessPosition[][] getBoardPositions() { return BoardPositions; }
 
+    /**
+     * Compares the chess board against another object to determine if they are equal.
+     * @param o The reference object with which to compare.
+     * @return True if the objects are the same, False if the objects are different.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
@@ -106,6 +110,10 @@ public class ChessBoard {
         return Arrays.deepEquals(BoardPositions, that.BoardPositions);
     }
 
+    /**
+     * Generates a hashcode consisting of BoardPositions.
+     * @return The generated hashcode.
+     */
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(BoardPositions);
