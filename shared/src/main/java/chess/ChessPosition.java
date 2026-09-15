@@ -83,19 +83,23 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return Row == that.Row && Column == that.Column && Objects.equals(CurrentPiece, that.CurrentPiece);
+        return Row == that.Row && Column == that.Column;
     }
 
     /**
-     * Generates a hashcode consisting of Row, Column, and CurrentPiece.
+     * Generates a hashcode consisting of Row and Column.
      * @return The generated hashcode.
      */
     @Override
     public int hashCode()
     {
-        return Objects.hash(Row, Column, CurrentPiece);
+        return Objects.hash(Row, Column);
     }
 
+    /**
+     * Gives a human-readable format of the position.
+     * @return A string consisting of [row, col].
+     */
     @Override
-    public String toString() { return String.format("[%d,%d:%s]", Row, Column, CurrentPiece); }
+    public String toString() { return String.format("[%d,%d]", Row, Column); }
 }

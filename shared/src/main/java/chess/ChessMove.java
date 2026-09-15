@@ -63,7 +63,7 @@ public class ChessMove {
     }
 
     /**
-     * Gives a human-readable format of the position.
+     * Gives a human-readable format of the move.
      * @return A string consisting of [startPos, endPos].
      */
     @Override
