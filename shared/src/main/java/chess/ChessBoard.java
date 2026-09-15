@@ -11,12 +11,12 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    private final ChessPosition[] BoardPositions = new ChessPosition[64];
+    private final ChessPosition[][] BoardPositions = new ChessPosition[8][8];
 
     public ChessBoard()
     {
         for(int i = 0; i < 64; i++) // 8 rows x 8 columns = 64 total positions
-            BoardPositions[i] = new ChessPosition(i/8 + 1, i%8 + 1); // i%8 gets remainder, i/8 gets floored value; + 1 to account for non-zero indexing
+            BoardPositions[i/8][i%8] = new ChessPosition(i/8 + 1, i%8 + 1); // i%8 gets remainder, i/8 gets floored value; + 1 to account for non-zero indexing
     }
 
     /**
@@ -45,31 +45,32 @@ public class ChessBoard {
      */
     public void resetBoard() {
         // clear
-        for(ChessPosition position : BoardPositions)
-            position.removePiece();
+        for(int i = 0; i < 64; i++)
+            getPositionAt(i/8 + 1, i%8 + 1).removePiece();
+        // add pieces
         for(int i = 0; i < 2; i++)
         {
-            int offset = (i * 56); // 56 is offset of black from white; j will only be 0 OR 1
+            int offset = (i * 7); // j will only be 0 OR 1; evaluates to either 0 or 7, which are rows of "special" pieces
             ChessGame.TeamColor color = i == 0 ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
 
             ChessPiece rook = new ChessPiece(color, ChessPiece.PieceType.ROOK); // these pieces are used twice, so init them first
             ChessPiece knight = new ChessPiece(color, ChessPiece.PieceType.KNIGHT);
             ChessPiece bishop = new ChessPiece(color, ChessPiece.PieceType.BISHOP);
 
-            BoardPositions[offset].addPiece(rook);
-            BoardPositions[offset + 1].addPiece(knight);
-            BoardPositions[offset + 2].addPiece(bishop);
-            BoardPositions[offset + 3].addPiece(new ChessPiece(color, ChessPiece.PieceType.QUEEN)); // only 1 queen and king
-            BoardPositions[offset + 4].addPiece(new ChessPiece(color, ChessPiece.PieceType.KING));
-            BoardPositions[offset + 5].addPiece(bishop);
-            BoardPositions[offset + 6].addPiece(knight);
-            BoardPositions[offset + 7].addPiece(rook);
+            BoardPositions[offset][0].addPiece(rook);
+            BoardPositions[offset][1].addPiece(knight);
+            BoardPositions[offset][2].addPiece(bishop);
+            BoardPositions[offset][3].addPiece(new ChessPiece(color, ChessPiece.PieceType.QUEEN)); // only 1 queen and king
+            BoardPositions[offset][4].addPiece(new ChessPiece(color, ChessPiece.PieceType.KING));
+            BoardPositions[offset][5].addPiece(bishop);
+            BoardPositions[offset][6].addPiece(knight);
+            BoardPositions[offset][7].addPiece(rook);
 
             ChessPiece pawn = new ChessPiece(color, ChessPiece.PieceType.PAWN); // create pawn only once per color
-            int leftmostPawn = offset + (color == ChessGame.TeamColor.WHITE ? 8 : -8); // + or - 8 because pawns are closer to center
-            for(int j = leftmostPawn; j < leftmostPawn + 8; j++) // 8 total pawns
+            offset = color == ChessGame.TeamColor.WHITE ? 1 : 6;
+            for(int j = 0; j < 8; j++) // 8 total pawns
             {
-                BoardPositions[j].addPiece(pawn);
+                BoardPositions[offset][j].addPiece(pawn);
             }
 
         }
@@ -85,17 +86,16 @@ public class ChessBoard {
     {
         row--;
         col--; // to account for non-zero indexing
-        int index = (row * 8) + col; // multiply row by 8 because there are 8 columns per row (ex. row 1 col 4: (8 * 1) + 4 = 12)
         if(row > 7 || row < 0 || col > 7 || col < 0)
             return null;
-        return BoardPositions[index];
+        return BoardPositions[row][col];
     }
 
     /**
      * Gets all the positions in the chess board.
      * @return An array of positions;
      */
-    public ChessPosition[] getBoardPositions() { return BoardPositions; }
+    public ChessPosition[][] getBoardPositions() { return BoardPositions; }
 
     @Override
     public boolean equals(Object o) {
@@ -108,6 +108,6 @@ public class ChessBoard {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(BoardPositions);
+        return Arrays.deepHashCode(BoardPositions);
     }
 }

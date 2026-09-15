@@ -61,4 +61,13 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(StartPosition, EndPosition, PromotionPiece);
     }
+
+    /**
+     * Gives a human-readable format of the position.
+     * @return A string consisting of [startPos, endPos].
+     */
+    @Override
+    public String toString() {
+        return String.format("%s%s", StartPosition, EndPosition);
+    }
 }
