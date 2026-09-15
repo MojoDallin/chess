@@ -65,25 +65,7 @@ public class ChessPiece {
         {
             case PAWN:
             {
-                int nextRow = TeamColor == ChessGame.TeamColor.WHITE ? currentRow - 1 : currentRow + 1; // -1 = white, +1 = black
-
-                if(board.getPositionAt(nextRow, currentCol).getCurrentPiece() == null) // can move forward if space in front is not occupied
-                {
-                    possibleMoves.add(new ChessMove(myPosition, new ChessPosition(nextRow, currentCol), null));
-                    if(!HasMoved) // if it's the first move, then add an extra space
-                    {
-                        int nextNextRow = TeamColor == ChessGame.TeamColor.WHITE ? nextRow + 1 : nextRow - 1;
-                        if(board.getPositionAt(nextNextRow, currentCol).getCurrentPiece() == null)
-                            possibleMoves.add(new ChessMove(myPosition, new ChessPosition(nextNextRow, currentCol), null));
-                    }
-                }
-                for(int i = -1; i < 2; i += 2) // diagonal moves
-                {
-                    int diagonalCol = currentCol + i;
-                    if(diagonalCol > 0 && diagonalCol < 9) // checks for bounds
-                        if (board.getPositionAt(nextRow, diagonalCol).getCurrentPiece() != null) // can move diagonally if either (or both) spaces ARE occupied
-                            possibleMoves.add(new ChessMove(myPosition, new ChessPosition(nextRow, currentCol + i), null));
-                }
+                possibleMoves.addAll(PieceMovesCalculator.calculatePawnMoves(board, myPosition));
                 break;
             }
             case ROOK:
@@ -131,9 +113,15 @@ public class ChessPiece {
                 break;
             }
         }
-
+        HasMoved = true;
         return possibleMoves;
     }
+
+    /**
+     * Gets the HasMoved field from ChessPiece.
+     * @return The boolean HasMoved field, determining if the piece has moved (mainly for castling).
+     */
+    public boolean hasMoved() { return HasMoved; }
 
     /**
      * Compares the chess piece against another object to determine if they are equal.

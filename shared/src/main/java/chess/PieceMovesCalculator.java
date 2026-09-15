@@ -106,4 +106,47 @@ public class PieceMovesCalculator
         return diagonalMoves;
     }
 
+    /**
+     * Grabs all the moves a pawn can move to.
+     * @param board The chess board.
+     * @param oldPosition The 'old', or current position of the piece to calculate moves for.
+     * @return A list of ChessMove(s) centered on the current piece.
+     */
+    public static HashSet<ChessMove> calculatePawnMoves(ChessBoard board, ChessPosition oldPosition)
+    {
+        HashSet<ChessMove> pawnMoves = new HashSet<>();
+        ChessPiece piece = board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece();
+        int direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+        boolean pawnHasMoved = direction == 1 ? oldPosition.getRow() != 2 : oldPosition.getRow() != 7;
+        ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + direction, oldPosition.getColumn());
+        if(nextPosition.isOccupied(piece) == 0) // unoccupied by anything
+            pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(oldPosition.getRow() + direction, oldPosition.getColumn()), null));
+        if(!pawnHasMoved && pawnMoves.size() == 1) // add another movement if pawn has not moved AND square directly in front is not blocked
+        {
+            nextPosition = board.getPositionAt(nextPosition.getRow() + direction, nextPosition.getColumn());
+            if(nextPosition.isOccupied(piece) == 0)
+                pawnMoves.add(new ChessMove(oldPosition, new ChessPosition(oldPosition.getRow() + (direction * 2), oldPosition.getColumn()), null));
+        }
+        // diagonal moves
+        for(int i = -1; i < 2; i += 2)
+        {
+            ChessPosition diagonalPosition = board.getPositionAt(oldPosition.getRow() + direction, oldPosition.getColumn() + i);
+            if(diagonalPosition != null && diagonalPosition.isOccupied(piece) == 1) // occupied by enemy
+                pawnMoves.add(new ChessMove(oldPosition, diagonalPosition, null));
+        }
+        // promotions
+        if((direction == 1 && nextPosition.getRow() == 8) || (direction == -1 && nextPosition.getRow() == 1))
+        {
+            HashSet<ChessMove> promotionMoves = new HashSet<>();
+            for(ChessMove move : pawnMoves)
+            {
+                for(ChessPiece.PieceType newPieceType : chess.ChessPiece.PieceType.values())
+                    if(newPieceType != ChessPiece.PieceType.KING && newPieceType != ChessPiece.PieceType.PAWN)
+                        promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), newPieceType));
+            }
+            return promotionMoves; // only return promotion moves
+        }
+        return pawnMoves;
+    }
+
 }
