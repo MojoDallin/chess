@@ -62,6 +62,15 @@ public class ChessPosition {
      */
     public void removePiece() { CurrentPiece = null; }
 
+    public int isOccupied(ChessPiece piece)
+    {
+        if(CurrentPiece == null)
+            return 0; // 0 if unoccupied
+        if(piece.getTeamColor() != CurrentPiece.getTeamColor())
+            return 1; // 1 if occupied by DIFFERENT team color
+        return 2; // 2 if occupied by SAME team color
+    }
+
     /**
      * Compares the chess position against another object to determine if they are equal.
      * @param o The reference object with which to compare.
@@ -86,4 +95,7 @@ public class ChessPosition {
     {
         return Objects.hash(Row, Column, CurrentPiece);
     }
+
+    @Override
+    public String toString() { return String.format("[%d,%d:%s]", Row, Column, CurrentPiece); }
 }
