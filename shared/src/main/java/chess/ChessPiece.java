@@ -88,7 +88,7 @@ public class ChessPiece {
             }
             case ROOK:
             {
-                possibleMoves.addAll(getHorizontalAndVerticalMoves(board, myPosition));
+                possibleMoves.addAll(PieceMovesCalculator.calculateRookMoves(board, myPosition));
                 break;
             }
             case KNIGHT:
@@ -126,70 +126,13 @@ public class ChessPiece {
             case QUEEN:
             {
                 possibleMoves.addAll(PieceMovesCalculator.calculateKingMoves(board, myPosition)); // king moves
-                possibleMoves.addAll(getHorizontalAndVerticalMoves(board, myPosition)); // rook moves
+                possibleMoves.addAll(PieceMovesCalculator.calculateRookMoves(board, myPosition)); // rook moves
                 possibleMoves.addAll(getDiagonalMoves(board, myPosition)); // bishop moves
                 break;
             }
         }
 
         return possibleMoves;
-    }
-
-    /**
-     * Grabs all the horizontal and vertical spaces a piece can move to. Intended for use with Rook and Queen movement.
-     * @param board The chess board.
-     * @param oldPosition The 'old', or current position of the piece to calculate moves for.
-     * @return A list of ChessMove(s) centered on the current piece.
-     */
-    private HashSet<ChessMove> getHorizontalAndVerticalMoves(ChessBoard board, ChessPosition oldPosition) // for rook and queen
-    {
-        HashSet<ChessMove> verticalHorizontalMoves = new HashSet<>();
-        int currentCol = oldPosition.getColumn();
-        int currentRow = oldPosition.getRow();
-
-        for(int i = -1; i < 2; i += 2) // vertical
-        {
-            int nextPos = oldPosition.getRow() + i;
-            ChessPosition newPosition = board.getPositionAt(nextPos, currentCol);
-            while (newPosition != null) // next position is in bounds and not occupied
-            {
-                ChessPiece curPiece = newPosition.getCurrentPiece();
-                ChessMove newMove = new ChessMove(oldPosition, newPosition, null);
-                if(curPiece != null && curPiece.getTeamColor() != TeamColor) // occupied by enemy piece
-                {
-                    verticalHorizontalMoves.add(newMove);
-                    break;
-                }
-                else if(curPiece != null) // occupied by team piece
-                    break;
-                verticalHorizontalMoves.add(newMove); // unoccupied
-                nextPos += i;
-                newPosition = board.getPositionAt(nextPos, currentCol);
-            }
-        }
-
-        for(int i = -1; i < 2; i += 2) // horizontal
-        {
-            int nextPos = oldPosition.getColumn() + i;
-            ChessPosition newPosition = board.getPositionAt(currentRow, nextPos);
-            while(newPosition != null && newPosition.getCurrentPiece() == null)
-            {
-                ChessPiece curPiece = newPosition.getCurrentPiece();
-                ChessMove newMove = new ChessMove(oldPosition, newPosition, null);
-                if(curPiece != null && curPiece.getTeamColor() != TeamColor)
-                {
-                    verticalHorizontalMoves.add(new ChessMove(oldPosition, newPosition, null));
-                    break;
-                }
-                else if(curPiece != null)
-                    break;
-                verticalHorizontalMoves.add(newMove);
-                nextPos += i;
-                newPosition = board.getPositionAt(currentRow, nextPos);
-            }
-        }
-
-        return verticalHorizontalMoves;
     }
 
     private HashSet<ChessMove> getDiagonalMoves(ChessBoard board, ChessPosition oldPosition)
