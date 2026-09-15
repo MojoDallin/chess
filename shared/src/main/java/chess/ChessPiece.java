@@ -12,7 +12,7 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor teamColor;
     private final PieceType pieceType;
-    private boolean hasMoved = false;
+
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type)
     {
@@ -91,7 +91,7 @@ public class ChessPiece {
                 break;
             }
         }
-        hasMoved = true;
+
         for(ChessMove move : possibleMoves)
         {
             move.getEndPosition().addPiece(null);
@@ -99,11 +99,7 @@ public class ChessPiece {
         return possibleMoves;
     }
 
-//    /**
-//     * Gets the HasMoved field from ChessPiece.
-//     * @return The boolean HasMoved field, determining if the piece has moved (mainly for castling).
-//     */
-//    public boolean hasMoved() { return hasMoved; }
+
 
     /**
      * Compares the chess piece against another object to determine if they are equal.
