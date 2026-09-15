@@ -38,7 +38,6 @@ public class PieceMovesCalculator
      * @param oldPosition The 'old', or current position of the piece to calculate moves for.
      * @return A list of ChessMove(s) centered on the current piece.
      */
-
     public static HashSet<ChessMove> calculateRookMoves(ChessBoard board, ChessPosition oldPosition) // for rook and queen
     {
         HashSet<ChessMove> verticalHorizontalMoves = new HashSet<>();
@@ -72,6 +71,39 @@ public class PieceMovesCalculator
         }
 
         return verticalHorizontalMoves;
+    }
+
+    /**
+     * Grabs all the diagonal spaces a piece can move to. Intended for use with Bishop and Queen movement.
+     * @param board The chess board.
+     * @param oldPosition The 'old', or current position of the piece to calculate moves for.
+     * @return A list of ChessMove(s) centered on the current piece.
+     */
+    public static HashSet<ChessMove> calculateBishopMoves(ChessBoard board, ChessPosition oldPosition)
+    {
+        HashSet<ChessMove> diagonalMoves = new HashSet<>();
+
+        for(int i = 0; i < 4; i++)
+        {
+            int offsetRow = i < 2 ? 1 : -1;
+            int offsetCol = i % 2 == 0 ? 1 : -1;
+            ChessPosition nextPosition = board.getPositionAt(oldPosition.getRow() + offsetRow, oldPosition.getColumn() + offsetCol);
+            while(nextPosition != null)
+            {
+                int isOccupied = nextPosition.isOccupied(board.getPositionAt(oldPosition.getRow(), oldPosition.getColumn()).getCurrentPiece());
+                if(isOccupied < 2)
+                {
+                    diagonalMoves.add(new ChessMove(oldPosition, nextPosition, null));
+                    if(isOccupied == 1)
+                        break;
+                }
+                else
+                    break;
+                nextPosition = board.getPositionAt(nextPosition.getRow() + offsetRow, nextPosition.getColumn() + offsetCol);
+            }
+        }
+
+        return diagonalMoves;
     }
 
 }
