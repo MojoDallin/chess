@@ -85,7 +85,6 @@ public class ChessPiece {
             }
             case QUEEN:
             {
-                possibleMoves.addAll(PieceMovesCalculator.calculateKingMoves(board, myPosition)); // king moves
                 possibleMoves.addAll(PieceMovesCalculator.calculateRookMoves(board, myPosition)); // rook moves
                 possibleMoves.addAll(PieceMovesCalculator.calculateBishopMoves(board, myPosition)); // bishop moves
                 break;
