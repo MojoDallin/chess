@@ -18,7 +18,6 @@ public class ChessBoard {
         {
             boardPositions[i / 8][i % 8] = new ChessPosition(i / 8 + 1, i % 8 + 1); // + 1 to account for non-zero indexing
         }
-        resetBoard();
     }
 
     /**
