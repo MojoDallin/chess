@@ -54,6 +54,10 @@ public class ChessGame {
             return null;
         }
         ChessPiece piece = startPosition.getCurrentPiece();
+        if(piece == null)
+        {
+            return null;
+        }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition); // WIP
 
 
@@ -67,7 +71,18 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition oldPosition = board.getPositionAt(move.getStartPosition().getRow(), move.getStartPosition().getColumn());
+        if(oldPosition.getCurrentPiece() == null)
+        {
+            return;
+        }
+        Collection<ChessMove> possibleMoves = oldPosition.getCurrentPiece().pieceMoves(board, move.getStartPosition());
+        if(!possibleMoves.contains(move))
+        {
+            throw new InvalidMoveException(); // invalidmoveexception if possibleMoves doesnt contain move
+        }
+        board.getPositionAt(move.getEndPosition().getRow(), move.getEndPosition().getColumn()).addPiece(oldPosition.getCurrentPiece()); // "move" piece to end spot
+        oldPosition.removePiece(); // remove piece as it moved
     }
 
     /**
