@@ -14,7 +14,8 @@ public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard board;
 
-    public ChessGame() {
+    public ChessGame()
+    {
         teamTurn = TeamColor.WHITE; // white always starts first
         board = new ChessBoard();
         board.resetBoard();
@@ -37,7 +38,8 @@ public class ChessGame {
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
-    public enum TeamColor {
+    public enum TeamColor
+    {
         WHITE,
         BLACK
     }
@@ -60,7 +62,6 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition); // WIP
-
 
         return possibleMoves;
     }
@@ -95,18 +96,23 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor)
     {
         ChessPosition kingPosition = getKingPosition(teamColor);
-        for(ChessPosition[] rows : board.getBoardPositions())
+        if(kingPosition != null)
         {
-            for(ChessPosition position : rows)
+            for (ChessPosition[] rows : board.getBoardPositions())
             {
-                if(position.getCurrentPiece() != null && position.getCurrentPiece().getTeamColor() != teamColor)
+                for (ChessPosition position : rows)
                 {
-                    Collection<ChessMove> possibleMoves = position.getCurrentPiece().pieceMoves(board, position);
-                    for(ChessMove move : possibleMoves)
+                    if (position.getCurrentPiece() != null && position.getCurrentPiece().getTeamColor() != teamColor)
                     {
-                        ChessPosition end = move.getEndPosition();
-                        if(end.getRow() == kingPosition.getRow() && end.getColumn() == kingPosition.getColumn())
-                            return true;
+                        Collection<ChessMove> possibleMoves = position.getCurrentPiece().pieceMoves(board, position);
+                        for (ChessMove move : possibleMoves)
+                        {
+                            ChessPosition end = move.getEndPosition();
+                            if (end.getRow() == kingPosition.getRow() && end.getColumn() == kingPosition.getColumn())
+                            {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -120,8 +126,9 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+    public boolean isInCheckmate(TeamColor teamColor)
+    {
+        return validMoves(getKingPosition(teamColor)).isEmpty();
     }
 
     /**
@@ -148,9 +155,7 @@ public class ChessGame {
      *
      * @return the chessboard
      */
-    public ChessBoard getBoard() {
-        return board;
-    }
+    public ChessBoard getBoard() { return board; }
 
     /**
      * Gets the chess position of a team color.
@@ -171,7 +176,6 @@ public class ChessGame {
             }
         }
         return null;
-
     }
 
     /**
@@ -180,8 +184,10 @@ public class ChessGame {
      * @return true if the objects are the same, false if they are different; if the other object is NOT a chess game, it always returns false.
      */
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(Object o)
+    {
+        if (o == null || getClass() != o.getClass())
+        {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
@@ -193,7 +199,5 @@ public class ChessGame {
      * @return The generated hashcode.
      */
     @Override
-    public int hashCode() {
-        return Objects.hash(teamTurn, board);
-    }
+    public int hashCode() { return Objects.hash(teamTurn, board); }
 }
