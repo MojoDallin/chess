@@ -56,38 +56,7 @@ public class ChessGame {
         ChessPiece piece = board.getPositionAt(startPosition.getRow(), startPosition.getColumn()).getCurrentPiece();
         if(piece == null)  { return possibleMoves;} // empty if no piece
         possibleMoves = piece.pieceMoves(board, startPosition);
-        if(isInCheck(teamTurn))
-        {
-            if(piece.getPieceType() != ChessPiece.PieceType.KING)
-            {
-                Collection<ChessMove> newMoves = new ArrayList<>();
-                Collection<ChessPosition> checkingPositions = getPieceCheckingPositions(teamTurn);
-                for(ChessMove move : possibleMoves)
-                {
-                    if(checkingPositions.contains(move.getEndPosition()))
-                    {
-                        newMoves.add(move);
-                    }
-                }
-                return newMoves;
-            }
-            else
-            {
-                for(ChessMove kingMove : possibleMoves)
-                {
-                    board.getPositionAt(kingMove.getEndPosition().getRow(), kingMove.getEndPosition().getColumn()).addPiece(piece);
-                    board.getPositionAt(kingMove.getStartPosition().getRow(), kingMove.getStartPosition().getColumn()).removePiece();
-                    if(isInCheck(teamTurn))
-                    {
-                        possibleMoves.remove(kingMove); // if the new move WOULD put the king in check, then cant move there
-                    }
-                    board.getPositionAt(kingMove.getStartPosition().getRow(), kingMove.getStartPosition().getColumn()).addPiece(piece);
-                    board.getPositionAt(kingMove.getEndPosition().getRow(), kingMove.getEndPosition().getColumn()).removePiece();
-                }
-            }
-        }
-
-        return possibleMoves;
+        return nonCheckMoves(possibleMoves);
     }
 
     /**
@@ -122,6 +91,30 @@ public class ChessGame {
     }
 
     /**
+     * Checks for all the moves a piece can move to without triggering a check.
+     * @param oldMoves The list of moves to check for.
+     * @return A collection of ChessMoves that the piece can safely move to; empty if none.
+     */
+    private Collection<ChessMove> nonCheckMoves(Collection<ChessMove> oldMoves)
+    {
+        Collection<ChessMove> newMoves = new ArrayList<>();
+        for(ChessMove move : oldMoves)
+        {
+            ChessPosition oldPosition = board.getPositionAt(move.getStartPosition().getRow(), move.getStartPosition().getColumn());
+            ChessPosition newPosition = board.getPositionAt(move.getEndPosition().getRow(), move.getEndPosition().getColumn());
+            ChessPiece oldPiece = newPosition.getCurrentPiece();
+            newPosition.addPiece(oldPosition.getCurrentPiece());
+            oldPosition.removePiece();
+            if(!isInCheck(newPosition.getCurrentPiece().getTeamColor())) // gets team color corresponding to "moved" piece
+            {
+                newMoves.add(move);
+            }
+            oldPosition.addPiece(newPosition.getCurrentPiece());
+            newPosition.addPiece(oldPiece);
+        }
+        return newMoves;
+    }
+    /**
      * Determines if the given team is in check
      *
      * @param teamColor which team to check for check
@@ -152,7 +145,7 @@ public class ChessGame {
                             ChessPosition end = move.getEndPosition();
                             if (end.getRow() == kingPosition.getRow() && end.getColumn() == kingPosition.getColumn())
                             {
-                                checkingPositions.add(end);
+                                checkingPositions.add(new ChessPosition(move.getStartPosition().getRow(), move.getStartPosition().getColumn()));
                             }
                         }
                     }
