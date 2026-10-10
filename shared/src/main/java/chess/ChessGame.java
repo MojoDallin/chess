@@ -52,15 +52,9 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         Collection<ChessMove> possibleMoves = new ArrayList<>();
-        if(startPosition == null)
-        {
-            return possibleMoves;
-        }
+        if(startPosition == null)  { return possibleMoves; } // empty if no position
         ChessPiece piece = board.getPositionAt(startPosition.getRow(), startPosition.getColumn()).getCurrentPiece();
-        if(piece == null)
-        {
-            return possibleMoves;
-        }
+        if(piece == null)  { return possibleMoves;} // empty if no piece
         possibleMoves = piece.pieceMoves(board, startPosition);
         if(isInCheck(teamTurn))
         {
@@ -85,7 +79,7 @@ public class ChessGame {
                     board.getPositionAt(kingMove.getStartPosition().getRow(), kingMove.getStartPosition().getColumn()).removePiece();
                     if(isInCheck(teamTurn))
                     {
-                        possibleMoves.remove(kingMove);
+                        possibleMoves.remove(kingMove); // if the new move WOULD put the king in check, then cant move there
                     }
                     board.getPositionAt(kingMove.getStartPosition().getRow(), kingMove.getStartPosition().getColumn()).addPiece(piece);
                     board.getPositionAt(kingMove.getEndPosition().getRow(), kingMove.getEndPosition().getColumn()).removePiece();
@@ -104,12 +98,12 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition oldPosition = board.getPositionAt(move.getStartPosition().getRow(), move.getStartPosition().getColumn());
-        if(oldPosition.getCurrentPiece() == null)
+        if(oldPosition.getCurrentPiece() == null || oldPosition.getCurrentPiece().getTeamColor() != teamTurn) // if piece is null OR wrong piece color attempted to move
         {
             throw new InvalidMoveException();
         }
         Collection<ChessMove> possibleMoves = validMoves(move.getStartPosition());
-        if(!possibleMoves.contains(move))
+        if(!possibleMoves.contains(move)) // move is not in possible moves
         {
             throw new InvalidMoveException(); // invalidmoveexception if possibleMoves doesnt contain move
         }
@@ -135,6 +129,11 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) { return !getPieceCheckingPositions(teamColor).isEmpty(); }
 
+    /**
+     * Checks for pieces which currently put the king in check.
+     * @param teamColor The team color to check for a check.
+     * @return A list of ChessPositions of pieces that currently put the king in check; an empty list of king is not in check.
+     */
     private Collection<ChessPosition> getPieceCheckingPositions(TeamColor teamColor)
     {
         Collection<ChessPosition> checkingPositions = new ArrayList<>();
