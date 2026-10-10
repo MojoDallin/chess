@@ -91,10 +91,7 @@ public class ChessPiece {
             }
         }
 
-        for(ChessMove move : possibleMoves)
-        {
-            move.getEndPosition().addPiece(null);
-        }
+
         return possibleMoves;
     }
 
