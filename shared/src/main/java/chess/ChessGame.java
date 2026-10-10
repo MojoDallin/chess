@@ -186,7 +186,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor)
     {
-        return validMoves(getKingPosition(teamColor)).isEmpty() && !isInCheck(teamColor);
+        return isInCheckmate(teamColor) && !isInCheck(teamColor);
     }
 
     /**
