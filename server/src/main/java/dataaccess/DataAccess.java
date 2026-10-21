@@ -13,6 +13,7 @@ import java.util.HashSet;
 public interface DataAccess {
     // create functions
     LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException;
+    int createNewGame(GameData data) throws ResponseException;
     // read functions
     HashMap<Integer, GameData> getAllGames();
     // update functions

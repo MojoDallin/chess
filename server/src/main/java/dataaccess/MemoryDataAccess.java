@@ -13,8 +13,8 @@ import java.util.*;
 
 public class MemoryDataAccess implements DataAccess
 {
-    private int nextGameID = 1;
-    private int nextUserID = 1;
+    private int nextGameID = 0;
+    private int nextUserID = 0;
     final private HashMap<Integer, UserData> users = new HashMap<>();
     final private HashMap<Integer, GameData> games = new HashMap<>();
     final private HashSet<AuthData> authData = new HashSet<>();
@@ -72,12 +72,14 @@ public class MemoryDataAccess implements DataAccess
     public void clearUsers()
     {
         users.clear();
+        nextUserID = 0;
     }
 
     @Override
     public void clearGames()
     {
         games.clear();
+        nextGameID = 0;
     }
 
     @Override
@@ -101,6 +103,17 @@ public class MemoryDataAccess implements DataAccess
             tokens.add(data.authToken());
         }
         return tokens;
+    }
+
+    @Override
+    public int createNewGame(GameData data) throws ResponseException
+    {
+        if(data.gameName() == null)
+        {
+            throw new ResponseException(400, "Error: bad request");
+        }
+        games.put(nextGameID++, data);
+        return nextGameID;
     }
 
     @Override

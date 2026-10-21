@@ -32,6 +32,7 @@ public class Server {
         javalin.delete("/db", this::clearData);
         javalin.delete("/session", this::logout);
         javalin.get("/game", this::listGames);
+        javalin.post("/game", this::createGame);
 
         javalin.exception(ResponseException.class, this::handleException);
 
@@ -76,7 +77,19 @@ public class Server {
     private void clearData(Context ctx)
     {
         userService.deleteUserData();
+        gameService.deleteGameData();
         ctx.status(200);
+    }
+
+    private void createGame(Context ctx) throws ResponseException
+    {
+        if(isAuthorized(ctx))
+        {
+            GameData gameData = new Gson().fromJson(ctx.body(), GameData.class);
+            int id = gameService.createGame(gameData);
+            ctx.status(200);
+            ctx.result(new Gson().toJson(Map.of("gameID", id)));
+        }
     }
 
     private void listGames(Context ctx)
