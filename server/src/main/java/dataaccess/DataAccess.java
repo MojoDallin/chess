@@ -1,8 +1,11 @@
 package dataaccess;
 
 import exceptions.ResponseException;
+import model.UserData;
 import results.*;
 import requests.*;
+
+import java.util.HashMap;
 
 public interface DataAccess {
     // create functions
@@ -14,4 +17,7 @@ public interface DataAccess {
     // delete functions
     void clearUsers();
     void clearGames();
+
+    // other functions
+    HashMap<Integer, UserData> getUsers();
 }

@@ -40,5 +40,11 @@ public class MemoryDataAccess implements DataAccess
         games.clear();
     }
 
+    @Override
+    public HashMap<Integer, UserData> getUsers()
+    {
+        return users;
+    }
+
     private String randomToken() { return UUID.randomUUID().toString(); };
 }

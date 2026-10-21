@@ -2,8 +2,11 @@ package service;
 
 import dataaccess.DataAccess;
 import exceptions.ResponseException;
+import model.UserData;
 import requests.*;
 import results.*;
+
+import java.util.HashMap;
 
 public class UserService
 {
@@ -24,5 +27,10 @@ public class UserService
     public void deleteUserData()
     {
         dataAccess.clearUsers();
+    }
+
+    public HashMap<Integer, UserData> getUserData()
+    {
+        return dataAccess.getUsers();
     }
 }
