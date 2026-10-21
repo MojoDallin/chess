@@ -1,11 +1,13 @@
 package dataaccess;
 
 import exceptions.ResponseException;
+import model.AuthData;
 import model.UserData;
 import results.*;
 import requests.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public interface DataAccess {
     // create functions
@@ -15,10 +17,12 @@ public interface DataAccess {
     // update functions
     LoginResult loginUser(LoginRequest loginRequest) throws ResponseException;
     // delete functions
+    void logoutUser(LogoutRequest logoutRequest) throws ResponseException;
     void clearUsers();
     void clearGames();
     void clearAuthData();
 
     // other functions
     HashMap<Integer, UserData> getUsers();
+    HashSet<String> getAuthTokens();
 }

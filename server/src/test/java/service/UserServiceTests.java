@@ -7,7 +7,9 @@ import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.LoginRequest;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
+import results.LoginResult;
 
 import java.util.HashMap;
 
@@ -69,6 +71,19 @@ class UserServiceTests
         assertThrows(ResponseException.class, () -> userService.loginUser(new LoginRequest("username_wrong", "password")));
         userService.loginUser(new LoginRequest("username", "password"));
         userService.loginUser(new LoginRequest("username", "password")); // login twice
+    }
+
+    @Test
+    void logoutUser() throws ResponseException
+    {
+        RegisterRequest request = new RegisterRequest("username", "password", "email");
+        userService.registerUser(request);
+
+        LoginResult result = userService.loginUser(new LoginRequest("username", "password"));
+        userService.logoutUser(new LogoutRequest(result.authToken()));
+        assertThrows(ResponseException.class, () -> userService.logoutUser(new LogoutRequest(result.authToken()))); // double logout
+        LoginResult result2 = userService.loginUser(new LoginRequest("username", "password"));
+        assertThrows(ResponseException.class, () -> userService.logoutUser(new LogoutRequest("invalid token")));
     }
 
     @Test

@@ -5,6 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import requests.LoginRequest;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
 
@@ -57,6 +58,17 @@ public class MemoryDataAccess implements DataAccess
     }
 
     @Override
+    public void logoutUser(LogoutRequest logoutRequest) throws ResponseException
+    {
+        AuthData data = findAuthDataByToken(logoutRequest.authToken());
+        if(data == null)
+        {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        authData.remove(data);
+    }
+
+    @Override
     public void clearUsers()
     {
         users.clear();
@@ -80,6 +92,17 @@ public class MemoryDataAccess implements DataAccess
         return users;
     }
 
+    @Override
+    public HashSet<String> getAuthTokens()
+    {
+        HashSet<String> tokens = new HashSet<>();
+        for(AuthData data : authData)
+        {
+            tokens.add(data.authToken());
+        }
+        return tokens;
+    }
+
     private String randomToken() { return UUID.randomUUID().toString(); };
     private UserData findUserDataByUsername(String username)
     {
@@ -92,6 +115,17 @@ public class MemoryDataAccess implements DataAccess
             if(Objects.equals(entry.getValue().username(), username))
             {
                 return entry.getValue();
+            }
+        }
+        return null;
+    }
+    private AuthData findAuthDataByToken(String authToken)
+    {
+        for(AuthData data : authData)
+        {
+            if(Objects.equals(data.authToken(), authToken))
+            {
+                return data;
             }
         }
         return null;

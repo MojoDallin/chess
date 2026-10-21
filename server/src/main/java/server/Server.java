@@ -7,10 +7,12 @@ import io.javalin.http.Context;
 import com.google.gson.Gson;
 import model.UserData;
 import requests.LoginRequest;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
 import service.UserService;
 
+import java.util.HashSet;
 import java.util.Map;
 
 public class Server {
@@ -24,6 +26,7 @@ public class Server {
         javalin.post("/user", this::register);
         javalin.post("/session", this::login);
         javalin.delete("/db", this::clearData);
+        javalin.delete("/session", this::logout);
 
         javalin.exception(ResponseException.class, this::handleException);
 
@@ -44,18 +47,24 @@ public class Server {
     {
         UserData newUser = new Gson().fromJson(ctx.body(), UserData.class);
         LoginResult result = userService.registerUser(new RegisterRequest(newUser.username(), newUser.password(), newUser.email()));
-
-        ctx.status(200);
-        ctx.result(new Gson().toJson(Map.of("authToken", result.authToken(), "username", result.username())));
+        login(ctx); // login automatically after registering
     }
 
     private void login(Context ctx) throws ResponseException
     {
         UserData user = new Gson().fromJson(ctx.body(), UserData.class);
         LoginResult result = userService.loginUser(new LoginRequest(user.username(), user.password()));
-
         ctx.status(200);
         ctx.result(new Gson().toJson(Map.of("authToken", result.authToken(), "username", result.username())));
+    }
+
+    private void logout(Context ctx) throws ResponseException
+    {
+        if(isAuthorized(ctx))
+        {
+            userService.logoutUser(new LogoutRequest(ctx.header("authorization")));
+            ctx.status(200);
+        }
     }
 
     private void clearData(Context ctx)
@@ -68,5 +77,18 @@ public class Server {
     {
         ctx.status(exception.id());
         ctx.result(exception.toJson());
+    }
+
+    private boolean isAuthorized(Context ctx)
+    {
+        String token = ctx.header("authorization");
+        HashSet<String> tokens = userService.getAuthTokens();
+        if(tokens.contains(token))
+        {
+            return true;
+        }
+        ctx.status(401);
+        ctx.result(new Gson().toJson(Map.of("message", "Error: unauthorized")));
+        return false;
     }
 }

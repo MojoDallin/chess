@@ -2,11 +2,13 @@ package service;
 
 import dataaccess.DataAccess;
 import exceptions.ResponseException;
+import model.AuthData;
 import model.UserData;
 import requests.*;
 import results.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class UserService
 {
@@ -24,7 +26,10 @@ public class UserService
     {
         return dataAccess.loginUser(loginRequest);
     }
-    public void logoutUser(LogoutRequest logoutRequest) {}
+    public void logoutUser(LogoutRequest logoutRequest) throws ResponseException
+    {
+        dataAccess.logoutUser(logoutRequest);
+    }
 
     public void deleteUserData()
     {
@@ -34,5 +39,9 @@ public class UserService
     public HashMap<Integer, UserData> getUserData()
     {
         return dataAccess.getUsers();
+    }
+    public HashSet<String> getAuthTokens()
+    {
+        return dataAccess.getAuthTokens();
     }
 }
