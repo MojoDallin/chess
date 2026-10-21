@@ -3,7 +3,6 @@ package service;
 import dataaccess.MemoryDataAccess;
 import exceptions.ResponseException;
 import model.UserData;
-import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.LoginRequest;
@@ -34,7 +33,7 @@ class UserServiceTests
     }
 
     @Test
-    void registerBadUser() throws ResponseException
+    void registerBadUser()
     {
         RegisterRequest request = new RegisterRequest(null, "password", "email");
         RegisterRequest request2 = new RegisterRequest("username", null, "email");
@@ -82,7 +81,7 @@ class UserServiceTests
         LoginResult result = USER_SERVICE.loginUser(new LoginRequest("username", "password"));
         USER_SERVICE.logoutUser(new LogoutRequest(result.authToken()));
         assertThrows(ResponseException.class, () -> USER_SERVICE.logoutUser(new LogoutRequest(result.authToken()))); // double logout
-        LoginResult result2 = USER_SERVICE.loginUser(new LoginRequest("username", "password"));
+        USER_SERVICE.loginUser(new LoginRequest("username", "password"));
         assertThrows(ResponseException.class, () -> USER_SERVICE.logoutUser(new LogoutRequest("invalid token")));
     }
 
@@ -94,5 +93,25 @@ class UserServiceTests
 
         USER_SERVICE.deleteUserData();
         assertEquals(0, USER_SERVICE.getUserData().size()); // should have nothing inside it
+    }
+
+    @Test
+    void dataCounts() throws ResponseException
+    {
+        RegisterRequest request = new RegisterRequest("username", "password", "email");
+        RegisterRequest request2 = new RegisterRequest("username2", "password", "email");
+        USER_SERVICE.registerUser(request);
+        USER_SERVICE.registerUser(request2);
+        LoginRequest login = new LoginRequest(request.username(), request.password());
+        USER_SERVICE.loginUser(login);
+        assertEquals(1, USER_SERVICE.getAuthData().size());
+        assertEquals(2, USER_SERVICE.getUserData().size());
+        USER_SERVICE.loginUser(login);
+        assertEquals(2, USER_SERVICE.getUserData().size());
+        USER_SERVICE.loginUser(new LoginRequest(request2.username(), request2.password()));
+        assertEquals(3, USER_SERVICE.getAuthData().size());
+        assertEquals(2, USER_SERVICE.getUserData().size());
+
+        assertEquals(3, USER_SERVICE.getAuthTokens().size());
     }
 }
