@@ -126,7 +126,13 @@ public class MemoryDataAccess implements DataAccess
     @Override
     public void joinGame(JoinRequest request) throws ResponseException
     {
-        if((!Objects.equals(request.data().playerColor(), "WHITE") && !Objects.equals(request.data().playerColor(), "BLACK")) || request.data().gameID() < 1)
+        String color = request.data().playerColor();
+        if(color == null)
+        {
+            throw new ResponseException(400, "Error: bad request");
+        }
+        boolean validColor = color.contains("WHITE") || color.contains("BLACK");
+        if(!validColor || request.data().gameID() < 1)
         {
             throw new ResponseException(400, "Error: bad request");
         }
@@ -135,12 +141,14 @@ public class MemoryDataAccess implements DataAccess
         {
             throw new ResponseException(500, "Error: game ID " + request.data().gameID() + " not found");
         }
-        if((gameData.whiteUsername() != null && request.data().playerColor().equals("WHITE")) || (gameData.blackUsername() != null && request.data().playerColor().equals("BLACK")))
+        boolean whiteTaken = gameData.whiteUsername() != null;
+        boolean blackTaken = gameData.blackUsername() != null;
+        if((whiteTaken && color.equals("WHITE")) || (blackTaken && color.equals("BLACK")))
         {
             throw new ResponseException(403, "Error: already taken");
         }
         games.remove(request.data().gameID());
-        gameData = gameData.addPlayer(request.data().playerColor(), request.username());
+        gameData = gameData.addPlayer(color, request.username());
         games.put(request.data().gameID(), gameData);
     }
 

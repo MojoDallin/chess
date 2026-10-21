@@ -67,9 +67,9 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition oldPosition = board.getPositionAt(move.getStartPosition().getRow(), move.getStartPosition().getColumn());
-        if(oldPosition.getCurrentPiece() == null || oldPosition.getCurrentPiece().getTeamColor() != teamTurn) // if piece is null OR wrong piece color attempted to move
+        if(oldPosition.getCurrentPiece() == null || oldPosition.getCurrentPiece().getTeamColor() != teamTurn)
         {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException(); // null piece / wrong color attempted to move
         }
         Collection<ChessMove> possibleMoves = validMoves(move.getStartPosition());
         if(!possibleMoves.contains(move)) // move is not in possible moves
