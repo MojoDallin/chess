@@ -28,5 +28,17 @@ public class MemoryDataAccess implements DataAccess
         return new LoginResult(registerRequest.username(), randomToken());
     }
 
+    @Override
+    public void clearUsers()
+    {
+        users.clear();
+    }
+
+    @Override
+    public void clearGames()
+    {
+        games.clear();
+    }
+
     private String randomToken() { return UUID.randomUUID().toString(); };
 }

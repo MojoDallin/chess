@@ -12,4 +12,6 @@ public interface DataAccess {
     // update functions
 
     // delete functions
+    void clearUsers();
+    void clearGames();
 }

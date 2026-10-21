@@ -18,6 +18,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
+        javalin.delete("/db", this::clearData);
 
         javalin.exception(ResponseException.class, this::handleException);
 
@@ -38,6 +39,12 @@ public class Server {
     {
         UserData newUser = new Gson().fromJson(ctx.body(), UserData.class);
         results.LoginResult result = userService.registerUser(new RegisterRequest(newUser.username(), newUser.password(), newUser.email()));
+    }
+
+    private void clearData(Context ctx)
+    {
+        userService.deleteUserData();
+        ctx.status(200);
     }
 
     private void handleException(ResponseException exception, Context ctx)

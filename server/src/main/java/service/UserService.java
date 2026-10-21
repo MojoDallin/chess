@@ -20,4 +20,9 @@ public class UserService
     }
     public LoginResult loginUser(LoginRequest loginRequest) { return new LoginResult("", ""); }
     public void logoutUser(LogoutRequest logoutRequest) {}
+
+    public void deleteUserData()
+    {
+        dataAccess.clearUsers();
+    }
 }
