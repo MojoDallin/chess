@@ -3,7 +3,9 @@ package dataaccess;
 import exceptions.ResponseException;
 import model.AuthData;
 import model.GameData;
+import model.JoinData;
 import model.UserData;
+import requests.JoinRequest;
 import requests.LoginRequest;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
@@ -52,7 +54,7 @@ public class MemoryDataAccess implements DataAccess
             throw new ResponseException(401, "Error: password is not correct");
         }
         String token = randomToken();
-        authData.remove(new AuthData("", loginRequest.username())); // delete old auth token (if applicable)
+        //authData.remove(new AuthData("", loginRequest.username())); // delete old auth token (if applicable)
         authData.add(new AuthData(token, loginRequest.username()));
         return new LoginResult(loginRequest.username(), token);
     }
@@ -95,6 +97,9 @@ public class MemoryDataAccess implements DataAccess
     }
 
     @Override
+    public HashSet<AuthData> getAuthData() { return authData; }
+
+    @Override
     public HashSet<String> getAuthTokens()
     {
         HashSet<String> tokens = new HashSet<>();
@@ -112,8 +117,31 @@ public class MemoryDataAccess implements DataAccess
         {
             throw new ResponseException(400, "Error: bad request");
         }
-        games.put(nextGameID++, data);
+        nextGameID++;
+        data = new GameData(nextGameID, data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
+        games.put(nextGameID, data);
         return nextGameID;
+    }
+
+    @Override
+    public void joinGame(JoinRequest request) throws ResponseException
+    {
+        if((!Objects.equals(request.data().playerColor(), "WHITE") && !Objects.equals(request.data().playerColor(), "BLACK")) || request.data().gameID() < 1)
+        {
+            throw new ResponseException(400, "Error: bad request");
+        }
+        GameData gameData = findGameDataByID(request.data().gameID());
+        if(gameData == null)
+        {
+            throw new ResponseException(500, "Error: game ID " + request.data().gameID() + " not found");
+        }
+        if((gameData.whiteUsername() != null && request.data().playerColor().equals("WHITE")) || (gameData.blackUsername() != null && request.data().playerColor().equals("BLACK")))
+        {
+            throw new ResponseException(403, "Error: already taken");
+        }
+        games.remove(request.data().gameID());
+        gameData = gameData.addPlayer(request.data().playerColor(), request.username());
+        games.put(request.data().gameID(), gameData);
     }
 
     @Override
@@ -132,6 +160,21 @@ public class MemoryDataAccess implements DataAccess
         for(Map.Entry<Integer, UserData> entry : users.entrySet())
         {
             if(Objects.equals(entry.getValue().username(), username))
+            {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    private GameData findGameDataByID(int id)
+    {
+        if(!games.containsValue(new GameData(id, null, null, null, null)))
+        {
+            return null;
+        }
+        for(Map.Entry<Integer, GameData> entry : games.entrySet())
+        {
+            if(Objects.equals(entry.getValue().gameID(), id))
             {
                 return entry.getValue();
             }

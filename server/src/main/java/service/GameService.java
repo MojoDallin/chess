@@ -3,6 +3,8 @@ package service;
 import dataaccess.DataAccess;
 import exceptions.ResponseException;
 import model.GameData;
+import model.JoinData;
+import requests.JoinRequest;
 
 import java.util.HashMap;
 
@@ -22,5 +24,9 @@ public class GameService
     public void deleteGameData()
     {
         dataAccess.clearGames();
+    }
+    public void joinGame(JoinRequest request) throws ResponseException
+    {
+        dataAccess.joinGame(request);
     }
 }

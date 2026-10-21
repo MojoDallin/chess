@@ -5,8 +5,11 @@ import exceptions.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
+import model.AuthData;
 import model.GameData;
+import model.JoinData;
 import model.UserData;
+import requests.JoinRequest;
 import requests.LoginRequest;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
@@ -17,6 +20,7 @@ import service.UserService;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 public class Server {
 
@@ -33,6 +37,7 @@ public class Server {
         javalin.delete("/session", this::logout);
         javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
+        javalin.put("/game", this::joinGame);
 
         javalin.exception(ResponseException.class, this::handleException);
 
@@ -89,6 +94,26 @@ public class Server {
             int id = gameService.createGame(gameData);
             ctx.status(200);
             ctx.result(new Gson().toJson(Map.of("gameID", id)));
+        }
+    }
+
+    private void joinGame(Context ctx) throws ResponseException
+    {
+        if(isAuthorized(ctx))
+        {
+            JoinData joinData = new Gson().fromJson(ctx.body(), JoinData.class);
+            String token = ctx.header("authorization");
+            HashSet<AuthData> tokens = userService.getAuthData();
+            String username = "";
+            for(AuthData data : tokens)
+            {
+                if(Objects.equals(data.authToken(), token))
+                {
+                    username = data.username();
+                    break;
+                }
+            }
+            gameService.joinGame(new JoinRequest(joinData, username));
         }
     }
 

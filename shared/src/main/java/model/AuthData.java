@@ -10,11 +10,11 @@ public record AuthData(String authToken, String username)
             return false;
         }
         AuthData authData = (AuthData) o;
-        return Objects.equals(username, authData.username);
+        return Objects.equals(username, authData.username) && Objects.equals(authToken, authData.authToken);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(username);
+        return Objects.hash(authToken, username);
     }
 }

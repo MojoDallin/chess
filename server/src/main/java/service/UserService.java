@@ -33,7 +33,7 @@ public class UserService
 
     public void deleteUserData()
     {
-        dataAccess.clearUsers();
+        dataAccess.clearUsers(); dataAccess.clearAuthData();
     }
 
     public HashMap<Integer, UserData> getUserData()
@@ -44,4 +44,5 @@ public class UserService
     {
         return dataAccess.getAuthTokens();
     }
+    public HashSet<AuthData> getAuthData() { return dataAccess.getAuthData(); }
 }
