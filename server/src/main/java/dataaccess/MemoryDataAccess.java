@@ -103,6 +103,12 @@ public class MemoryDataAccess implements DataAccess
         return tokens;
     }
 
+    @Override
+    public HashMap<Integer, GameData> getAllGames()
+    {
+        return games;
+    }
+
     private String randomToken() { return UUID.randomUUID().toString(); };
     private UserData findUserDataByUsername(String username)
     {

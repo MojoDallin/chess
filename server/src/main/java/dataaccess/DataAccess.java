@@ -2,6 +2,7 @@ package dataaccess;
 
 import exceptions.ResponseException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import results.*;
 import requests.*;
@@ -13,7 +14,7 @@ public interface DataAccess {
     // create functions
     LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException;
     // read functions
-
+    HashMap<Integer, GameData> getAllGames();
     // update functions
     LoginResult loginUser(LoginRequest loginRequest) throws ResponseException;
     // delete functions

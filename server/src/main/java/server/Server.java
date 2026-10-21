@@ -5,13 +5,16 @@ import exceptions.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
+import model.GameData;
 import model.UserData;
 import requests.LoginRequest;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
+import service.GameService;
 import service.UserService;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -19,6 +22,7 @@ public class Server {
 
     private final Javalin javalin;
     private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -27,11 +31,13 @@ public class Server {
         javalin.post("/session", this::login);
         javalin.delete("/db", this::clearData);
         javalin.delete("/session", this::logout);
+        javalin.get("/game", this::listGames);
 
         javalin.exception(ResponseException.class, this::handleException);
 
-
-        this.userService = new UserService(new MemoryDataAccess());
+        MemoryDataAccess access = new MemoryDataAccess();
+        this.userService = new UserService(access);
+        this.gameService = new GameService(access);
     }
 
     public int run(int desiredPort) {
@@ -71,6 +77,16 @@ public class Server {
     {
         userService.deleteUserData();
         ctx.status(200);
+    }
+
+    private void listGames(Context ctx)
+    {
+        if(isAuthorized(ctx))
+        {
+            HashMap<Integer, GameData> games = gameService.getGames();
+            ctx.status(200);
+            ctx.result(new Gson().toJson(Map.of("games", games.values())));
+        }
     }
 
     private void handleException(ResponseException exception, Context ctx)
