@@ -6,8 +6,12 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
 import model.UserData;
+import requests.LoginRequest;
 import requests.RegisterRequest;
+import results.LoginResult;
 import service.UserService;
+
+import java.util.Map;
 
 public class Server {
 
@@ -18,6 +22,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
+        javalin.post("/session", this::login);
         javalin.delete("/db", this::clearData);
 
         javalin.exception(ResponseException.class, this::handleException);
@@ -38,7 +43,19 @@ public class Server {
     private void register(Context ctx) throws ResponseException
     {
         UserData newUser = new Gson().fromJson(ctx.body(), UserData.class);
-        results.LoginResult result = userService.registerUser(new RegisterRequest(newUser.username(), newUser.password(), newUser.email()));
+        LoginResult result = userService.registerUser(new RegisterRequest(newUser.username(), newUser.password(), newUser.email()));
+
+        ctx.status(200);
+        ctx.result(new Gson().toJson(Map.of("authToken", result.authToken(), "username", result.username())));
+    }
+
+    private void login(Context ctx) throws ResponseException
+    {
+        UserData user = new Gson().fromJson(ctx.body(), UserData.class);
+        LoginResult result = userService.loginUser(new LoginRequest(user.username(), user.password()));
+
+        ctx.status(200);
+        ctx.result(new Gson().toJson(Map.of("authToken", result.authToken(), "username", result.username())));
     }
 
     private void clearData(Context ctx)

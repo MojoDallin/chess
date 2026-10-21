@@ -18,10 +18,12 @@ public class UserService
 
     public LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException
     {
-
         return dataAccess.registerUser(registerRequest);
     }
-    public LoginResult loginUser(LoginRequest loginRequest) { return new LoginResult("", ""); }
+    public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException
+    {
+        return dataAccess.loginUser(loginRequest);
+    }
     public void logoutUser(LogoutRequest logoutRequest) {}
 
     public void deleteUserData()
