@@ -66,6 +66,13 @@ public class MySqlDataAccess implements DataAccess
     }
 
     @Override
+    public void logoutUser(LogoutRequest logoutRequest) throws ResponseException
+    {
+        String statement = "DELETE FROM authdata WHERE token=?";
+        updateDatabase(statement, logoutRequest.authToken());
+    }
+
+    @Override
     public int createNewGame(GameData data) throws ResponseException {
         return 0;
     }
@@ -77,11 +84,6 @@ public class MySqlDataAccess implements DataAccess
 
     @Override
     public void joinGame(JoinRequest request) throws ResponseException {
-
-    }
-
-    @Override
-    public void logoutUser(LogoutRequest logoutRequest) throws ResponseException {
 
     }
 
@@ -213,6 +215,29 @@ public class MySqlDataAccess implements DataAccess
                     if (resultSet.next())
                     {
                         return new UserData(resultSet.getString("username"), resultSet.getString("password"), resultSet.getString("email"));
+                    }
+                }
+            }
+        } catch (Exception ex)
+        {
+            throw new ResponseException(0, "");
+        }
+        return null;
+    }
+
+    private AuthData findAuthDataByToken(String token) throws ResponseException
+    {
+        try(Connection connection = DatabaseManager.getConnection())
+        {
+            String statement = "SELECT token, username FROM authdata WHERE token=?";
+            try(PreparedStatement prepared = connection.prepareStatement(statement))
+            {
+                prepared.setString(1, token);
+                try (ResultSet resultSet = prepared.executeQuery())
+                {
+                    if (resultSet.next())
+                    {
+                        return new AuthData(resultSet.getString("token"), resultSet.getString("username"));
                     }
                 }
             }
