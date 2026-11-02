@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import exceptions.ResponseException;
 import io.javalin.http.Context;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 import requests.*;
 import results.LoginResult;
 
@@ -39,7 +40,8 @@ public class MySqlDataAccess implements DataAccess
             throw new ResponseException(400, "Error: bad request");
         }
         String statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        updateDatabase(statement, registerRequest.username(), registerRequest.password(), registerRequest.email());
+        String hashedPassword = BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt());
+        updateDatabase(statement, registerRequest.username(), hashedPassword, registerRequest.email());
         return new LoginResult(registerRequest.username(), randomToken());
     }
 
@@ -55,7 +57,7 @@ public class MySqlDataAccess implements DataAccess
         {
             throw new ResponseException(401, "Error: username not found");
         }
-        if(!Objects.equals(data.password(), loginRequest.password()))
+        if(!BCrypt.checkpw(loginRequest.password(), data.password()))
         {
             throw new ResponseException(401, "Error: password is not correct");
         }
