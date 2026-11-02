@@ -16,7 +16,7 @@ public interface DataAccess {
     LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException;
     int createNewGame(GameData data, String token) throws ResponseException;
     // read functions
-    HashMap<Integer, GameData> getAllGames();
+    HashMap<Integer, GameData> getAllGames(String token) throws ResponseException;
     // update functions
     LoginResult loginUser(LoginRequest loginRequest) throws ResponseException;
     void joinGame(JoinRequest request, String token) throws ResponseException;

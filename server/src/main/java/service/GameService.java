@@ -12,9 +12,9 @@ public class GameService
     private final DataAccess dataAccess;
     public GameService(DataAccess dataAccess) {this.dataAccess = dataAccess;}
 
-    public HashMap<Integer, GameData> getGames()
+    public HashMap<Integer, GameData> getGames(String token) throws ResponseException
     {
-        return dataAccess.getAllGames();
+        return dataAccess.getAllGames(token);
     }
     public int createGame(GameData data, String token) throws ResponseException
     {

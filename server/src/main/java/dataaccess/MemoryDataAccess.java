@@ -153,7 +153,7 @@ public class MemoryDataAccess implements DataAccess
     }
 
     @Override
-    public HashMap<Integer, GameData> getAllGames()
+    public HashMap<Integer, GameData> getAllGames(String token)
     {
         return games;
     }

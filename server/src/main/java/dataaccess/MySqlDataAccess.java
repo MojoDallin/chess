@@ -94,7 +94,36 @@ public class MySqlDataAccess implements DataAccess
     }
 
     @Override
-    public HashMap<Integer, GameData> getAllGames() {
+    public HashMap<Integer, GameData> getAllGames(String token) throws ResponseException
+    {
+        if(isAuthorized(token))
+        {
+            HashMap<Integer, GameData> allGames = new HashMap<>();
+            try (Connection connection = DatabaseManager.getConnection())
+            {
+                String statement = "SELECT * FROM games";
+                try (PreparedStatement prepared = connection.prepareStatement(statement))
+                {
+                    try (ResultSet resultSet = prepared.executeQuery())
+                    {
+                        while (resultSet.next())
+                        {
+                            int id = resultSet.getInt("id");
+                            String whiteUsername = resultSet.getString("whiteUsername");
+                            String blackUsername = resultSet.getString("blackUsername");
+                            String gameName = resultSet.getString("gameName");
+                            ChessGame game = new Gson().fromJson(resultSet.getString("gameData"), ChessGame.class);
+                            GameData data = new GameData(id, whiteUsername, blackUsername, gameName, game);
+                            allGames.put(id, data);
+                        }
+                    }
+                }
+            } catch (Exception ex)
+            {
+                return null;
+            }
+            return allGames;
+        }
         return null;
     }
 

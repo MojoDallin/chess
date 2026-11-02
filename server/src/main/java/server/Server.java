@@ -107,12 +107,10 @@ public class Server {
 
     private void listGames(Context ctx) throws ResponseException
     {
-        //if(isAuthorized(ctx))
-        //{
-            HashMap<Integer, GameData> games = gameService.getGames();
-            ctx.status(200);
-            ctx.result(new Gson().toJson(Map.of("games", games.values())));
-        //}
+        String token = ctx.header("authorization");
+        HashMap<Integer, GameData> games = gameService.getGames(token);
+        ctx.status(200);
+        ctx.result(new Gson().toJson(Map.of("games", games.values())));
     }
 
     private void handleException(ResponseException exception, Context ctx)

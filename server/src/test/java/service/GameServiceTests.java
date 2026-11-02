@@ -39,8 +39,8 @@ class GameServiceTests
     {
         GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), "abc");
         GAME_SERVICE.createGame(new GameData(1, null, null, "name1", null), "abc");
-        assertEquals(2, GAME_SERVICE.getGames().size());
+        assertEquals(2, GAME_SERVICE.getGames("abc").size());
         GAME_SERVICE.deleteGameData();
-        assertEquals(0, GAME_SERVICE.getGames().size());
+        assertEquals(0, GAME_SERVICE.getGames("abc").size());
     }
 }
