@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.DatabaseManager;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import exceptions.ResponseException;
@@ -18,6 +19,9 @@ import results.LoginResult;
 import service.GameService;
 import service.UserService;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -73,11 +77,9 @@ public class Server {
 
     private void logout(Context ctx) throws ResponseException
     {
-        if(isAuthorized(ctx))
-        {
-            userService.logoutUser(new LogoutRequest(ctx.header("authorization")));
-            ctx.status(200);
-        }
+        String token = ctx.header("authorization");
+        userService.logoutUser(new LogoutRequest(ctx.header("authorization")));
+        ctx.status(200);
     }
 
     private void clearData(Context ctx)
@@ -89,19 +91,19 @@ public class Server {
 
     private void createGame(Context ctx) throws ResponseException
     {
-        if(isAuthorized(ctx))
-        {
+        //if(isAuthorized(ctx))
+        //{
             GameData gameData = new Gson().fromJson(ctx.body(), GameData.class);
             int id = gameService.createGame(gameData);
             ctx.status(200);
             ctx.result(new Gson().toJson(Map.of("gameID", id)));
-        }
+        //}
     }
 
     private void joinGame(Context ctx) throws ResponseException
     {
-        if(isAuthorized(ctx))
-        {
+        //if(isAuthorized(ctx))
+        //{
             JoinData joinData = new Gson().fromJson(ctx.body(), JoinData.class);
             String token = ctx.header("authorization");
             HashSet<AuthData> tokens = userService.getAuthData();
@@ -115,35 +117,22 @@ public class Server {
                 }
             }
             gameService.joinGame(new JoinRequest(joinData, username));
-        }
+        //}
     }
 
-    private void listGames(Context ctx)
+    private void listGames(Context ctx) throws ResponseException
     {
-        if(isAuthorized(ctx))
-        {
+        //if(isAuthorized(ctx))
+        //{
             HashMap<Integer, GameData> games = gameService.getGames();
             ctx.status(200);
             ctx.result(new Gson().toJson(Map.of("games", games.values())));
-        }
+        //}
     }
 
     private void handleException(ResponseException exception, Context ctx)
     {
         ctx.status(exception.id());
         ctx.result(exception.toJson());
-    }
-
-    private boolean isAuthorized(Context ctx)
-    {
-        String token = ctx.header("authorization");
-        HashSet<String> tokens = userService.getAuthTokens();
-        if(tokens.contains(token))
-        {
-            return true;
-        }
-        ctx.status(401);
-        ctx.result(new Gson().toJson(Map.of("message", "Error: unauthorized")));
-        return false;
     }
 }

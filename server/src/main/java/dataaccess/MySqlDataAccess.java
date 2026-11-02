@@ -1,15 +1,14 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import exceptions.ResponseException;
+import io.javalin.http.Context;
 import model.*;
 import requests.*;
 import results.LoginResult;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static java.sql.Types.NULL;
 
@@ -60,16 +59,19 @@ public class MySqlDataAccess implements DataAccess
             throw new ResponseException(401, "Error: password is not correct");
         }
         String token = randomToken();
-        String statement = "INSERT INTO authdata (token, username) VALUES (?, ?)";
+        String statement = "INSERT INTO authdata (authToken, username) VALUES (?, ?)";
         updateDatabase(statement, token, loginRequest.username());
-        return new LoginResult(loginRequest.username(), randomToken());
+        return new LoginResult(loginRequest.username(), token);
     }
 
     @Override
     public void logoutUser(LogoutRequest logoutRequest) throws ResponseException
     {
-        String statement = "DELETE FROM authdata WHERE token=?";
-        updateDatabase(statement, logoutRequest.authToken());
+        if(isAuthorized(logoutRequest.authToken()))
+        {
+            String statement = "DELETE FROM authdata WHERE authToken=?";
+            updateDatabase(statement, logoutRequest.authToken());
+        }
     }
 
     @Override
@@ -103,8 +105,14 @@ public class MySqlDataAccess implements DataAccess
     }
 
     @Override
-    public void clearAuthData() {
-
+    public void clearAuthData()
+    {
+        try {
+            updateDatabase("TRUNCATE authdata");
+        } catch (ResponseException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -169,10 +177,11 @@ public class MySqlDataAccess implements DataAccess
     private final String[] setupAuthDataTableStatements = {
             """
             CREATE TABLE IF NOT EXISTS authdata (
-                `token` varchar(256) NOT NULL,
+                `id` int NOT NULL AUTO_INCREMENT,
+                `authToken` varchar(256) NOT NULL,
                 `username` varchar(256) NOT NULL,
-                PRIMARY KEY (`token`),
-                INDEX (`username`)
+                PRIMARY KEY (`id`),
+                INDEX (`authToken`)
             )
             """
     };
@@ -225,11 +234,11 @@ public class MySqlDataAccess implements DataAccess
         return null;
     }
 
-    private AuthData findAuthDataByToken(String token) throws ResponseException
+    private boolean isAuthorized(String token) throws ResponseException
     {
         try(Connection connection = DatabaseManager.getConnection())
         {
-            String statement = "SELECT token, username FROM authdata WHERE token=?";
+            String statement = "SELECT authToken, username FROM authdata WHERE authToken=?";
             try(PreparedStatement prepared = connection.prepareStatement(statement))
             {
                 prepared.setString(1, token);
@@ -237,7 +246,7 @@ public class MySqlDataAccess implements DataAccess
                 {
                     if (resultSet.next())
                     {
-                        return new AuthData(resultSet.getString("token"), resultSet.getString("username"));
+                        return true;
                     }
                 }
             }
@@ -245,7 +254,7 @@ public class MySqlDataAccess implements DataAccess
         {
             throw new ResponseException(0, "");
         }
-        return null;
+        throw new ResponseException(401, "Error: unauthorized");
     }
 
     private String randomToken() { return UUID.randomUUID().toString(); };
