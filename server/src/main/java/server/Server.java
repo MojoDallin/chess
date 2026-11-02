@@ -91,33 +91,18 @@ public class Server {
 
     private void createGame(Context ctx) throws ResponseException
     {
-        //if(isAuthorized(ctx))
-        //{
-            GameData gameData = new Gson().fromJson(ctx.body(), GameData.class);
-            int id = gameService.createGame(gameData);
-            ctx.status(200);
-            ctx.result(new Gson().toJson(Map.of("gameID", id)));
-        //}
+        GameData gameData = new Gson().fromJson(ctx.body(), GameData.class);
+        String token = ctx.header("authorization");
+        int id = gameService.createGame(gameData, token);
+        ctx.status(200);
+        ctx.result(new Gson().toJson(Map.of("gameID", id)));
     }
 
     private void joinGame(Context ctx) throws ResponseException
     {
-        //if(isAuthorized(ctx))
-        //{
-            JoinData joinData = new Gson().fromJson(ctx.body(), JoinData.class);
-            String token = ctx.header("authorization");
-            HashSet<AuthData> tokens = userService.getAuthData();
-            String username = "";
-            for(AuthData data : tokens)
-            {
-                if(Objects.equals(data.authToken(), token))
-                {
-                    username = data.username();
-                    break;
-                }
-            }
-            gameService.joinGame(new JoinRequest(joinData, username));
-        //}
+        JoinData joinData = new Gson().fromJson(ctx.body(), JoinData.class);
+        String token = ctx.header("authorization");
+        gameService.joinGame(new JoinRequest(joinData, ""), token);
     }
 
     private void listGames(Context ctx) throws ResponseException

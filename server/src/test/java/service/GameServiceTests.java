@@ -20,25 +20,25 @@ class GameServiceTests
     @Test
     void createGames() throws ResponseException
     {
-        GAME_SERVICE.createGame(new GameData(0, "a", "b", "name", null));
+        GAME_SERVICE.createGame(new GameData(0, "a", "b", "name", null), "abc");
     }
 
     @Test
     void joinGame() throws ResponseException
     {
-        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null));
+        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), "abc");
 
-        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user"));
-        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("PURPLE", 1), "user4")));
-        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("BLACK", 1), "user2"));
-        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user3")));
+        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user"), "");
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("PURPLE", 1), "user4"), ""));
+        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("BLACK", 1), "user2"), "");
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user3"), ""));
     }
 
     @Test
     void gameAmounts() throws ResponseException
     {
-        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null));
-        GAME_SERVICE.createGame(new GameData(1, null, null, "name1", null));
+        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), "abc");
+        GAME_SERVICE.createGame(new GameData(1, null, null, "name1", null), "abc");
         assertEquals(2, GAME_SERVICE.getGames().size());
         GAME_SERVICE.deleteGameData();
         assertEquals(0, GAME_SERVICE.getGames().size());

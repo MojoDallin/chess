@@ -111,7 +111,7 @@ public class MemoryDataAccess implements DataAccess
     }
 
     @Override
-    public int createNewGame(GameData data) throws ResponseException
+    public int createNewGame(GameData data, String token) throws ResponseException
     {
         if(data.gameName() == null)
         {
@@ -124,7 +124,7 @@ public class MemoryDataAccess implements DataAccess
     }
 
     @Override
-    public void joinGame(JoinRequest request) throws ResponseException
+    public void joinGame(JoinRequest request, String token) throws ResponseException
     {
         String color = request.data().playerColor();
         if(color == null)

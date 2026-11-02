@@ -14,12 +14,12 @@ import java.util.HashSet;
 public interface DataAccess {
     // create functions
     LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException;
-    int createNewGame(GameData data) throws ResponseException;
+    int createNewGame(GameData data, String token) throws ResponseException;
     // read functions
     HashMap<Integer, GameData> getAllGames();
     // update functions
     LoginResult loginUser(LoginRequest loginRequest) throws ResponseException;
-    void joinGame(JoinRequest request) throws ResponseException;
+    void joinGame(JoinRequest request, String token) throws ResponseException;
     // delete functions
     void logoutUser(LogoutRequest logoutRequest) throws ResponseException;
     void clearUsers();

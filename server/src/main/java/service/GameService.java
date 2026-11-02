@@ -3,7 +3,6 @@ package service;
 import dataaccess.DataAccess;
 import exceptions.ResponseException;
 import model.GameData;
-import model.JoinData;
 import requests.JoinRequest;
 
 import java.util.HashMap;
@@ -17,16 +16,16 @@ public class GameService
     {
         return dataAccess.getAllGames();
     }
-    public int createGame(GameData data) throws ResponseException
+    public int createGame(GameData data, String token) throws ResponseException
     {
-        return dataAccess.createNewGame(data);
+        return dataAccess.createNewGame(data, token);
     }
     public void deleteGameData()
     {
         dataAccess.clearGames();
     }
-    public void joinGame(JoinRequest request) throws ResponseException
+    public void joinGame(JoinRequest request, String token) throws ResponseException
     {
-        dataAccess.joinGame(request);
+        dataAccess.joinGame(request, token);
     }
 }
