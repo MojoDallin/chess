@@ -1,6 +1,7 @@
 package server;
 
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import exceptions.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -41,7 +42,7 @@ public class Server {
 
         javalin.exception(ResponseException.class, this::handleException);
 
-        MemoryDataAccess access = new MemoryDataAccess();
+        MySqlDataAccess access = new MySqlDataAccess();
         this.userService = new UserService(access);
         this.gameService = new GameService(access);
     }
