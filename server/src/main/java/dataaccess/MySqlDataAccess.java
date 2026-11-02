@@ -46,7 +46,22 @@ public class MySqlDataAccess implements DataAccess
     @Override
     public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException
     {
+        if(loginRequest.username() == null || loginRequest.password() == null)
+        {
+            throw new ResponseException(400, "Error: bad request");
+        }
         UserData data = findUserDataByUsername(loginRequest.username());
+        if(data == null)
+        {
+            throw new ResponseException(401, "Error: username not found");
+        }
+        if(!Objects.equals(data.password(), loginRequest.password()))
+        {
+            throw new ResponseException(401, "Error: password is not correct");
+        }
+        String token = randomToken();
+        String statement = "INSERT INTO authdata (token, username) VALUES (?, ?)";
+        updateDatabase(statement, token, loginRequest.username());
         return new LoginResult(loginRequest.username(), randomToken());
     }
 
@@ -137,7 +152,7 @@ public class MySqlDataAccess implements DataAccess
         }
     }
 
-    private final String[] setupUserTableStatements ={
+    private final String[] setupUserTableStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
                 `id` int NOT NULL AUTO_INCREMENT,
@@ -145,6 +160,16 @@ public class MySqlDataAccess implements DataAccess
                 `password` varchar(256) NOT NULL,
                 `email` varchar(256) NOT NULL,
                 PRIMARY KEY (`id`),
+                INDEX (`username`)
+            )
+            """
+    };
+    private final String[] setupAuthDataTableStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS authdata (
+                `token` varchar(256) NOT NULL,
+                `username` varchar(256) NOT NULL,
+                PRIMARY KEY (`token`),
                 INDEX (`username`)
             )
             """
@@ -157,11 +182,15 @@ public class MySqlDataAccess implements DataAccess
             DatabaseManager.createDatabase();
             try(Connection connection = DatabaseManager.getConnection())
             {
-                for(String statement : setupUserTableStatements)
+                String[][] statements = {setupUserTableStatements, setupAuthDataTableStatements};
+                for(String[] setupStatements : statements)
                 {
-                    try(PreparedStatement prepared = connection.prepareStatement(statement))
+                    for(String statement : setupStatements)
                     {
-                        prepared.executeUpdate();
+                        try (PreparedStatement prepared = connection.prepareStatement(statement))
+                        {
+                            prepared.executeUpdate();
+                        }
                     }
                 }
             }
