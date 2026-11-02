@@ -5,10 +5,7 @@ import model.*;
 import requests.*;
 import results.LoginResult;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
@@ -32,6 +29,15 @@ public class MySqlDataAccess implements DataAccess
     @Override
     public LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException
     {
+        UserData data = findUserDataByUsername(registerRequest.username());
+        if(data != null)
+        {
+            throw new ResponseException(403, "Error: already taken");
+        }
+        if(registerRequest.email() == null || registerRequest.username() == null || registerRequest.password() == null)
+        {
+            throw new ResponseException(400, "Error: bad request");
+        }
         String statement = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         updateDatabase(statement, registerRequest.username(), registerRequest.password(), registerRequest.email());
         return new LoginResult(registerRequest.username(), randomToken());
@@ -40,7 +46,8 @@ public class MySqlDataAccess implements DataAccess
     @Override
     public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException
     {
-        return null;
+        UserData data = findUserDataByUsername(loginRequest.username());
+        return new LoginResult(loginRequest.username(), randomToken());
     }
 
     @Override
@@ -64,8 +71,13 @@ public class MySqlDataAccess implements DataAccess
     }
 
     @Override
-    public void clearUsers() {
-
+    public void clearUsers()
+    {
+        try {
+            updateDatabase("TRUNCATE users");
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -157,6 +169,29 @@ public class MySqlDataAccess implements DataAccess
         {
             throw new ResponseException(500, "Unable to set up database: " + ex.getMessage());
         }
+    }
+
+    private UserData findUserDataByUsername(String username) throws ResponseException
+    {
+        try(Connection connection = DatabaseManager.getConnection())
+        {
+            String statement = "SELECT username, password, email FROM users WHERE username=?";
+            try(PreparedStatement prepared = connection.prepareStatement(statement))
+            {
+                prepared.setString(1, username);
+                try (ResultSet resultSet = prepared.executeQuery())
+                {
+                    if (resultSet.next())
+                    {
+                        return new UserData(resultSet.getString("username"), resultSet.getString("password"), resultSet.getString("email"));
+                    }
+                }
+            }
+        } catch (Exception ex)
+        {
+            throw new ResponseException(0, "");
+        }
+        return null;
     }
 
     private String randomToken() { return UUID.randomUUID().toString(); };
