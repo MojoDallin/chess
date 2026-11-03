@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import exceptions.ResponseException;
 import model.GameData;
@@ -7,12 +8,17 @@ import model.JoinData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import requests.JoinRequest;
+import requests.LoginRequest;
+import requests.RegisterRequest;
+import results.LoginResult;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTests
 {
-    static final GameService GAME_SERVICE = new GameService(new MemoryDataAccess());
+    static DataAccess dataAccess = new MemoryDataAccess();
+    static final GameService GAME_SERVICE = new GameService(dataAccess);
+    static final UserService USER_SERVICE = new UserService(dataAccess);
 
     @BeforeEach
     void clear() throws ResponseException { GAME_SERVICE.deleteGameData(); }
@@ -26,12 +32,16 @@ class GameServiceTests
     @Test
     void joinGame() throws ResponseException
     {
-        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), "abc");
+        USER_SERVICE.registerUser(new RegisterRequest("user1", "password", "email"));
+        USER_SERVICE.registerUser(new RegisterRequest("user2", "password", "email"));
+        LoginResult result1 = USER_SERVICE.loginUser(new LoginRequest("user1", "password"));
+        LoginResult result2 = USER_SERVICE.loginUser(new LoginRequest("user2", "password"));
+        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), result1.authToken());
 
-        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user"), "");
-        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("PURPLE", 1), "user4"), ""));
-        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("BLACK", 1), "user2"), "");
-        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user3"), ""));
+        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1)), result1.authToken());
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("PURPLE", 1)), result1.authToken()));
+        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("BLACK", 1)), result2.authToken());
+        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1)), result2.authToken()));
     }
 
     @Test

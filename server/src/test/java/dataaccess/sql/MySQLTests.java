@@ -112,12 +112,14 @@ class MySQLTests
     {
         userService.registerUser(new RegisterRequest("username", "password", "email"));
         LoginResult result = userService.loginUser(new LoginRequest("username", "password"));
+        userService.registerUser(new RegisterRequest("blackUsername", "password", "email"));
+        LoginResult result2 = userService.loginUser(new LoginRequest("blackUsername", "password"));
         gameService.createGame(new GameData(99, "username", null, "testGame", new ChessGame()), result.authToken());
         HashMap<Integer, GameData> allGames = gameService.getGames(result.authToken());
         assertNull(allGames.get(1).blackUsername()); // no black player (yet)
-        JoinRequest request = new JoinRequest(new JoinData("BLACK", 1), "blackUsername");
+        JoinRequest request = new JoinRequest(new JoinData("BLACK", 1));
         assertThrows(ResponseException.class, () -> gameService.joinGame(request, "invalid_token"));
-        gameService.joinGame(request, result.authToken());
+        gameService.joinGame(request, result2.authToken());
         allGames = gameService.getGames(result.authToken());
 
         assertEquals("blackUsername", gameService.getGames(result.authToken()).get(1).blackUsername());

@@ -102,7 +102,7 @@ public class Server {
     {
         JoinData joinData = new Gson().fromJson(ctx.body(), JoinData.class);
         String token = ctx.header("authorization");
-        gameService.joinGame(new JoinRequest(joinData, ""), token);
+        gameService.joinGame(new JoinRequest(joinData), token);
     }
 
     private void listGames(Context ctx) throws ResponseException

@@ -148,7 +148,7 @@ public class MemoryDataAccess implements DataAccess
             throw new ResponseException(403, "Error: already taken");
         }
         games.remove(request.data().gameID());
-        gameData = gameData.addPlayer(color, request.username());
+        gameData = gameData.addPlayer(color, findAuthDataByToken(token).username());
         games.put(request.data().gameID(), gameData);
     }
 

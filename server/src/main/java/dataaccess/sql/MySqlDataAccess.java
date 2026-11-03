@@ -141,7 +141,7 @@ public class MySqlDataAccess implements DataAccess
             if ((whiteTaken && color.equals("WHITE")) || (blackTaken && color.equals("BLACK"))) {
                 throw new ResponseException(403, "Error: already taken");
             }
-            String username = request.username();
+            String username = findUsernameByAuthToken(token);
             gameData.addPlayer(color, username);
             String statement = "UPDATE games SET ";
             if(color.equals("BLACK"))
