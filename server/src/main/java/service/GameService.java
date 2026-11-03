@@ -20,7 +20,7 @@ public class GameService
     {
         return dataAccess.createNewGame(data, token);
     }
-    public void deleteGameData()
+    public void deleteGameData() throws ResponseException
     {
         dataAccess.clearGames();
     }

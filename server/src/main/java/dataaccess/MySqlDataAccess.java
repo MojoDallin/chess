@@ -16,15 +16,9 @@ import static java.sql.Types.NULL;
 
 public class MySqlDataAccess implements DataAccess
 {
-    public MySqlDataAccess()
+    public MySqlDataAccess() throws ResponseException
     {
-        try
-        {
-            setupDatabase();
-        } catch (ResponseException e)
-        {
-            throw new RuntimeException(e);
-        }
+        setupDatabase();
     }
 
     @Override
@@ -167,35 +161,21 @@ public class MySqlDataAccess implements DataAccess
     }
 
     @Override
-    public void clearUsers()
+    public void clearUsers() throws ResponseException
     {
-        try {
-            updateDatabase("TRUNCATE users");
-        } catch (ResponseException e) {
-            throw new RuntimeException(e);
-        }
+        updateDatabase("TRUNCATE users");
     }
 
     @Override
-    public void clearGames()
+    public void clearGames() throws ResponseException
     {
-        try {
-            updateDatabase("TRUNCATE games");
-        } catch (ResponseException e)
-        {
-            throw new RuntimeException(e);
-        }
+        updateDatabase("TRUNCATE games");
     }
 
     @Override
-    public void clearAuthData()
+    public void clearAuthData() throws ResponseException
     {
-        try {
-            updateDatabase("TRUNCATE authdata");
-        } catch (ResponseException e)
-        {
-            throw new RuntimeException(e);
-        }
+        updateDatabase("TRUNCATE authdata");
     }
 
     @Override
@@ -241,7 +221,7 @@ public class MySqlDataAccess implements DataAccess
             }
         } catch (Exception ex)
         {
-            throw new ResponseException(500, "Unable to update database: " + statement + "; " + ex.getMessage());
+            throw new ResponseException(500, "Error: unable to update database: " + statement + "; " + ex.getMessage());
         }
     }
 
@@ -324,7 +304,7 @@ public class MySqlDataAccess implements DataAccess
             }
         } catch (Exception ex)
         {
-            throw new ResponseException(0, "");
+            throw new ResponseException(500, "Error: Internal Server Error");
         }
         return null;
     }
@@ -351,12 +331,12 @@ public class MySqlDataAccess implements DataAccess
             }
         } catch (Exception ex)
         {
-            throw new ResponseException(0, "");
+            throw new ResponseException(500, "Error: Internal Server Error");
         }
         return null;
     }
 
-    private String findUsernameByAuthToken(String token)
+    private String findUsernameByAuthToken(String token) throws ResponseException
     {
         try(Connection connection = DatabaseManager.getConnection())
         {
@@ -374,7 +354,7 @@ public class MySqlDataAccess implements DataAccess
             }
         } catch (Exception ex)
         {
-            throw new RuntimeException(ex);
+            throw new ResponseException(500, "Error: Internal Server Error");
         }
         return null;
     }
@@ -397,7 +377,7 @@ public class MySqlDataAccess implements DataAccess
             }
         } catch (Exception ex)
         {
-            throw new ResponseException(0, "");
+            throw new ResponseException(500, "Error: Internal Server Error");
         }
         throw new ResponseException(401, "Error: unauthorized");
     }
@@ -418,7 +398,7 @@ public class MySqlDataAccess implements DataAccess
             }
         } catch (Exception ex)
         {
-            throw new ResponseException(0, "");
+            throw new ResponseException(500, "Error: Internal Server Error");
         }
         return -1;
     }

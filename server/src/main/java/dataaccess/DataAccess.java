@@ -22,9 +22,9 @@ public interface DataAccess {
     void joinGame(JoinRequest request, String token) throws ResponseException;
     // delete functions
     void logoutUser(LogoutRequest logoutRequest) throws ResponseException;
-    void clearUsers();
-    void clearGames();
-    void clearAuthData();
+    void clearUsers() throws ResponseException;
+    void clearGames() throws ResponseException;
+    void clearAuthData() throws ResponseException;
 
     // other functions
     HashMap<Integer, UserData> getUsers();

@@ -31,9 +31,10 @@ public class UserService
         dataAccess.logoutUser(logoutRequest);
     }
 
-    public void deleteUserData()
+    public void deleteUserData() throws ResponseException
     {
-        dataAccess.clearUsers(); dataAccess.clearAuthData();
+        dataAccess.clearUsers();
+        dataAccess.clearAuthData();
     }
 
     public HashMap<Integer, UserData> getUserData()

@@ -15,7 +15,7 @@ class GameServiceTests
     static final GameService GAME_SERVICE = new GameService(new MemoryDataAccess());
 
     @BeforeEach
-    void clear() { GAME_SERVICE.deleteGameData(); }
+    void clear() throws ResponseException { GAME_SERVICE.deleteGameData(); }
 
     @Test
     void createGames() throws ResponseException

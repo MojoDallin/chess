@@ -19,7 +19,7 @@ class UserServiceTests
     static final UserService USER_SERVICE = new UserService(new MemoryDataAccess());
 
     @BeforeEach
-    void clear() { USER_SERVICE.deleteUserData(); }
+    void clear() throws ResponseException { USER_SERVICE.deleteUserData(); }
 
     @Test
     void registerUser() throws ResponseException

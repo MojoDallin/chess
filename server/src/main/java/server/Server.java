@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.DataAccess;
 import dataaccess.DatabaseManager;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
@@ -46,7 +47,13 @@ public class Server {
 
         javalin.exception(ResponseException.class, this::handleException);
 
-        MySqlDataAccess access = new MySqlDataAccess();
+        DataAccess access = new MemoryDataAccess();
+        try {
+            access = new MySqlDataAccess();
+        } catch (ResponseException ex)
+        {
+            System.out.println("Unable to start MySQL server, using memory server instead: " + ex.getMessage());
+        }
         this.userService = new UserService(access);
         this.gameService = new GameService(access);
     }
@@ -82,7 +89,7 @@ public class Server {
         ctx.status(200);
     }
 
-    private void clearData(Context ctx)
+    private void clearData(Context ctx) throws ResponseException
     {
         userService.deleteUserData();
         gameService.deleteGameData();
