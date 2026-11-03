@@ -19,20 +19,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MySQLUserServiceTests
 {
-    final UserService USER_SERVICE = new UserService(new MySqlDataAccess());
+    final UserService userService = new UserService(new MySqlDataAccess());
 
     MySQLUserServiceTests() throws ResponseException {}
 
     @BeforeEach
-    void clear() throws ResponseException { USER_SERVICE.deleteUserData(); }
+    void clear() throws ResponseException { userService.deleteUserData(); }
 
     @Test
     void registerUser() throws ResponseException
     {
         RegisterRequest request = new RegisterRequest("username", "password", "email");
-        USER_SERVICE.registerUser(request);
+        userService.registerUser(request);
 
-        HashMap<Integer, UserData> userData = USER_SERVICE.getUserData();
+        HashMap<Integer, UserData> userData = userService.getUserData();
         assertEquals(1, userData.size());
         assertTrue(userData.containsValue(new UserData("username", BCrypt.hashpw("password", BCrypt.gensalt()), "email")));
     }
@@ -44,9 +44,9 @@ class MySQLUserServiceTests
         RegisterRequest request2 = new RegisterRequest("username", null, "email");
         RegisterRequest request3 = new RegisterRequest("username", "password", null);
 
-        assertThrows(ResponseException.class, () -> USER_SERVICE.registerUser(request)); // bad username
-        assertThrows(ResponseException.class, () -> USER_SERVICE.registerUser(request2)); // bad password
-        assertThrows(ResponseException.class, () -> USER_SERVICE.registerUser(request3)); // bad email
+        assertThrows(ResponseException.class, () -> userService.registerUser(request)); // bad username
+        assertThrows(ResponseException.class, () -> userService.registerUser(request2)); // bad password
+        assertThrows(ResponseException.class, () -> userService.registerUser(request3)); // bad email
     }
 
     @Test
@@ -55,49 +55,49 @@ class MySQLUserServiceTests
         RegisterRequest request = new RegisterRequest("username", "password", "email");
         RegisterRequest request2 = new RegisterRequest("username2", "password", "email");
         RegisterRequest request3 = new RegisterRequest("username", "difPassword", "difEmail");
-        USER_SERVICE.registerUser(request);
-        USER_SERVICE.registerUser(request2);
+        userService.registerUser(request);
+        userService.registerUser(request2);
 
-        HashMap<Integer, UserData> userData = USER_SERVICE.getUserData();
+        HashMap<Integer, UserData> userData = userService.getUserData();
         assertEquals(2, userData.size());
         assertTrue(userData.containsValue(new UserData("username", BCrypt.hashpw("password", BCrypt.gensalt()), "email")));
         assertTrue(userData.containsValue(new UserData("username2", BCrypt.hashpw("password", BCrypt.gensalt()), "email")));
-        assertThrows(ResponseException.class, () -> USER_SERVICE.registerUser(request3)); // duplicate username
+        assertThrows(ResponseException.class, () -> userService.registerUser(request3)); // duplicate username
     }
 
     @Test
     void loginUser() throws ResponseException
     {
         RegisterRequest request = new RegisterRequest("username", "password", "email");
-        USER_SERVICE.registerUser(request);
+        userService.registerUser(request);
 
-        assertThrows(ResponseException.class, () -> USER_SERVICE.loginUser(new LoginRequest("username", "password_wrong")));
-        assertThrows(ResponseException.class, () -> USER_SERVICE.loginUser(new LoginRequest("username_wrong", "password")));
-        USER_SERVICE.loginUser(new LoginRequest("username", "password"));
-        USER_SERVICE.loginUser(new LoginRequest("username", "password")); // login twice
+        assertThrows(ResponseException.class, () -> userService.loginUser(new LoginRequest("username", "password_wrong")));
+        assertThrows(ResponseException.class, () -> userService.loginUser(new LoginRequest("username_wrong", "password")));
+        userService.loginUser(new LoginRequest("username", "password"));
+        userService.loginUser(new LoginRequest("username", "password")); // login twice
     }
 
     @Test
     void logoutUser() throws ResponseException
     {
         RegisterRequest request = new RegisterRequest("username", "password", "email");
-        USER_SERVICE.registerUser(request);
+        userService.registerUser(request);
 
-        LoginResult result = USER_SERVICE.loginUser(new LoginRequest("username", "password"));
-        USER_SERVICE.logoutUser(new LogoutRequest(result.authToken()));
-        assertThrows(ResponseException.class, () -> USER_SERVICE.logoutUser(new LogoutRequest(result.authToken()))); // double logout
-        USER_SERVICE.loginUser(new LoginRequest("username", "password"));
-        assertThrows(ResponseException.class, () -> USER_SERVICE.logoutUser(new LogoutRequest("invalid token")));
+        LoginResult result = userService.loginUser(new LoginRequest("username", "password"));
+        userService.logoutUser(new LogoutRequest(result.authToken()));
+        assertThrows(ResponseException.class, () -> userService.logoutUser(new LogoutRequest(result.authToken()))); // double logout
+        userService.loginUser(new LoginRequest("username", "password"));
+        assertThrows(ResponseException.class, () -> userService.logoutUser(new LogoutRequest("invalid token")));
     }
 
     @Test
     void clearUsers() throws ResponseException
     {
         RegisterRequest request = new RegisterRequest("username", "password", "email");
-        USER_SERVICE.registerUser(request);
+        userService.registerUser(request);
 
-        USER_SERVICE.deleteUserData();
-        assertEquals(0, USER_SERVICE.getUserData().size()); // should have nothing inside it
+        userService.deleteUserData();
+        assertEquals(0, userService.getUserData().size()); // should have nothing inside it
     }
 
     @Test
@@ -105,18 +105,18 @@ class MySQLUserServiceTests
     {
         RegisterRequest request = new RegisterRequest("username", "password", "email");
         RegisterRequest request2 = new RegisterRequest("username2", "password", "email");
-        USER_SERVICE.registerUser(request);
-        USER_SERVICE.registerUser(request2);
+        userService.registerUser(request);
+        userService.registerUser(request2);
         LoginRequest login = new LoginRequest(request.username(), request.password());
-        USER_SERVICE.loginUser(login);
-        assertEquals(1, USER_SERVICE.getAuthData().size());
-        assertEquals(2, USER_SERVICE.getUserData().size());
-        USER_SERVICE.loginUser(login);
-        assertEquals(2, USER_SERVICE.getUserData().size());
-        USER_SERVICE.loginUser(new LoginRequest(request2.username(), request2.password()));
-        assertEquals(3, USER_SERVICE.getAuthData().size());
-        assertEquals(2, USER_SERVICE.getUserData().size());
+        userService.loginUser(login);
+        assertEquals(1, userService.getAuthData().size());
+        assertEquals(2, userService.getUserData().size());
+        userService.loginUser(login);
+        assertEquals(2, userService.getUserData().size());
+        userService.loginUser(new LoginRequest(request2.username(), request2.password()));
+        assertEquals(3, userService.getAuthData().size());
+        assertEquals(2, userService.getUserData().size());
 
-        assertEquals(3, USER_SERVICE.getAuthTokens().size());
+        assertEquals(3, userService.getAuthTokens().size());
     }
 }

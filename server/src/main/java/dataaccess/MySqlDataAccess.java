@@ -88,35 +88,32 @@ public class MySqlDataAccess implements DataAccess
     @Override
     public HashMap<Integer, GameData> getAllGames(String token) throws ResponseException
     {
-        if(isAuthorized(token))
+        if(!isAuthorized(token)) { return null; }
+        HashMap<Integer, GameData> allGames = new HashMap<>();
+        try (Connection connection = DatabaseManager.getConnection())
         {
-            HashMap<Integer, GameData> allGames = new HashMap<>();
-            try (Connection connection = DatabaseManager.getConnection())
+            String statement = "SELECT * FROM games";
+            try (PreparedStatement prepared = connection.prepareStatement(statement))
             {
-                String statement = "SELECT * FROM games";
-                try (PreparedStatement prepared = connection.prepareStatement(statement))
+                try (ResultSet resultSet = prepared.executeQuery())
                 {
-                    try (ResultSet resultSet = prepared.executeQuery())
+                    while (resultSet.next())
                     {
-                        while (resultSet.next())
-                        {
-                            int id = resultSet.getInt("id");
-                            String whiteUsername = resultSet.getString("whiteUsername");
-                            String blackUsername = resultSet.getString("blackUsername");
-                            String gameName = resultSet.getString("gameName");
-                            ChessGame game = new Gson().fromJson(resultSet.getString("gameData"), ChessGame.class);
-                            GameData data = new GameData(id, whiteUsername, blackUsername, gameName, game);
-                            allGames.put(id, data);
-                        }
+                        int id = resultSet.getInt("id");
+                        String whiteUsername = resultSet.getString("whiteUsername");
+                        String blackUsername = resultSet.getString("blackUsername");
+                        String gameName = resultSet.getString("gameName");
+                        ChessGame game = new Gson().fromJson(resultSet.getString("gameData"), ChessGame.class);
+                        GameData data = new GameData(id, whiteUsername, blackUsername, gameName, game);
+                        allGames.put(id, data);
                     }
                 }
-            } catch (Exception ex)
-            {
-                return null;
             }
-            return allGames;
+        } catch (Exception ex)
+        {
+            return null;
         }
-        return null;
+        return allGames;
     }
 
     @Override
@@ -263,16 +260,8 @@ public class MySqlDataAccess implements DataAccess
             {
                 for(int i = 0; i < params.length; i++)
                 {
-                    Object param = params[i];
-                    switch (param)
-                    {
-                        case String s -> prepared.setString(i + 1, s);
-                        case Integer in -> prepared.setInt(i + 1, in);
-                        case null -> prepared.setNull(i + 1, NULL);
-                        default -> { }
-                    }
+                    changeParameters(params[i], prepared, i);
                 }
-
                 prepared.executeUpdate();
                 ResultSet resultSet = prepared.getGeneratedKeys();
                 if(resultSet.next())
@@ -287,7 +276,37 @@ public class MySqlDataAccess implements DataAccess
         }
     }
 
-    private final String[] setupUserTableStatements = {
+    private void changeParameters(Object param, PreparedStatement prepared, int i) throws SQLException
+    {
+        switch (param)
+        {
+            case String s -> prepared.setString(i + 1, s);
+            case Integer in -> prepared.setInt(i + 1, in);
+            case null -> prepared.setNull(i + 1, NULL);
+            default -> { }
+        }
+    }
+
+    private final String[] setupTableStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS games (
+                `id` int NOT NULL AUTO_INCREMENT,
+                `whiteUsername` varchar(256) NULL,
+                `blackUsername` varchar(256) NULL,
+                `gameName` varchar(256) NOT NULL,
+                `gameData` TEXT DEFAULT NULL,
+                PRIMARY KEY(`id`)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS authdata (
+                `id` int NOT NULL AUTO_INCREMENT,
+                `authToken` varchar(256) NOT NULL,
+                `username` varchar(256) NOT NULL,
+                PRIMARY KEY (`id`),
+                INDEX (`authToken`)
+            )
+            """,
             """
             CREATE TABLE IF NOT EXISTS users (
                 `id` int NOT NULL AUTO_INCREMENT,
@@ -299,29 +318,6 @@ public class MySqlDataAccess implements DataAccess
             )
             """
     };
-    private final String[] setupAuthDataTableStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS authdata (
-                `id` int NOT NULL AUTO_INCREMENT,
-                `authToken` varchar(256) NOT NULL,
-                `username` varchar(256) NOT NULL,
-                PRIMARY KEY (`id`),
-                INDEX (`authToken`)
-            )
-            """
-    };
-    private final String[] setupGameTableStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS games (
-                `id` int NOT NULL AUTO_INCREMENT,
-                `whiteUsername` varchar(256) NULL,
-                `blackUsername` varchar(256) NULL,
-                `gameName` varchar(256) NOT NULL,
-                `gameData` TEXT DEFAULT NULL,
-                PRIMARY KEY(`id`)
-            )
-            """
-    };
 
     private void setupDatabase() throws ResponseException
     {
@@ -330,15 +326,11 @@ public class MySqlDataAccess implements DataAccess
             DatabaseManager.createDatabase();
             try(Connection connection = DatabaseManager.getConnection())
             {
-                String[][] statements = {setupUserTableStatements, setupAuthDataTableStatements, setupGameTableStatements};
-                for(String[] setupStatements : statements)
+                for(String statement : setupTableStatements)
                 {
-                    for(String statement : setupStatements)
+                    try (PreparedStatement prepared = connection.prepareStatement(statement))
                     {
-                        try (PreparedStatement prepared = connection.prepareStatement(statement))
-                        {
-                            prepared.executeUpdate();
-                        }
+                        prepared.executeUpdate();
                     }
                 }
             }

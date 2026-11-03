@@ -19,47 +19,47 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class MySQLGameServiceTests
 {
     MySqlDataAccess dataAccess = new MySqlDataAccess();
-    final GameService GAME_SERVICE = new GameService(dataAccess);
-    final UserService USER_SERVICE = new UserService(dataAccess);
+    final GameService gameService = new GameService(dataAccess);
+    final UserService userService = new UserService(dataAccess);
 
     MySQLGameServiceTests() throws ResponseException {}
 
     @BeforeEach
-    void clear() throws ResponseException { GAME_SERVICE.deleteGameData(); USER_SERVICE.deleteUserData(); }
+    void clear() throws ResponseException { gameService.deleteGameData(); userService.deleteUserData(); }
 
     @Test
     void createGames() throws ResponseException
     {
-        USER_SERVICE.registerUser(new RegisterRequest("username", "password", "email"));
-        LoginResult result = USER_SERVICE.loginUser(new LoginRequest("username", "password"));
-        GAME_SERVICE.createGame(new GameData(0, "a", "b", "name", null), result.authToken());
+        userService.registerUser(new RegisterRequest("username", "password", "email"));
+        LoginResult result = userService.loginUser(new LoginRequest("username", "password"));
+        gameService.createGame(new GameData(0, "a", "b", "name", null), result.authToken());
     }
 
     @Test
     void joinGame() throws ResponseException
     {
-        USER_SERVICE.registerUser(new RegisterRequest("username", "password", "email"));
-        LoginResult result = USER_SERVICE.loginUser(new LoginRequest("username", "password"));
+        userService.registerUser(new RegisterRequest("username", "password", "email"));
+        LoginResult result = userService.loginUser(new LoginRequest("username", "password"));
         String token = result.authToken();
 
-        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), token);
-        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user"), token);
-        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("PURPLE", 1), "user4"), token));
-        GAME_SERVICE.joinGame(new JoinRequest(new JoinData("BLACK", 1), "user2"), token);
-        assertThrows(ResponseException.class, () -> GAME_SERVICE.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user3"), token));
+        gameService.createGame(new GameData(0, null, null, "name", null), token);
+        gameService.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user"), token);
+        assertThrows(ResponseException.class, () -> gameService.joinGame(new JoinRequest(new JoinData("PURPLE", 1), "user4"), token));
+        gameService.joinGame(new JoinRequest(new JoinData("BLACK", 1), "user2"), token);
+        assertThrows(ResponseException.class, () -> gameService.joinGame(new JoinRequest(new JoinData("WHITE", 1), "user3"), token));
     }
 
     @Test
     void gameAmounts() throws ResponseException
     {
-        USER_SERVICE.registerUser(new RegisterRequest("username", "password", "email"));
-        LoginResult result = USER_SERVICE.loginUser(new LoginRequest("username", "password"));
+        userService.registerUser(new RegisterRequest("username", "password", "email"));
+        LoginResult result = userService.loginUser(new LoginRequest("username", "password"));
         String token = result.authToken();
 
-        GAME_SERVICE.createGame(new GameData(0, null, null, "name", null), token);
-        GAME_SERVICE.createGame(new GameData(1, null, null, "name1", null), token);
-        assertEquals(2, GAME_SERVICE.getGames(token).size());
-        GAME_SERVICE.deleteGameData();
-        assertEquals(0, GAME_SERVICE.getGames(token).size());
+        gameService.createGame(new GameData(0, null, null, "name", null), token);
+        gameService.createGame(new GameData(1, null, null, "name1", null), token);
+        assertEquals(2, gameService.getGames(token).size());
+        gameService.deleteGameData();
+        assertEquals(0, gameService.getGames(token).size());
     }
 }
