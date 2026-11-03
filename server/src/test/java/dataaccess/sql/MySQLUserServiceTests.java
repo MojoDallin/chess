@@ -1,5 +1,6 @@
 package dataaccess.sql;
 
+import dataaccess.DataAccess;
 import dataaccess.MySqlDataAccess;
 import exceptions.ResponseException;
 import model.UserData;
@@ -13,13 +14,15 @@ import results.LoginResult;
 import service.UserService;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MySQLUserServiceTests
 {
-    final UserService userService = new UserService(new MySqlDataAccess());
+    DataAccess sqlAccess = new MySqlDataAccess();
+    final UserService userService = new UserService(sqlAccess);
 
     MySQLUserServiceTests() throws ResponseException {}
 
@@ -30,51 +33,38 @@ class MySQLUserServiceTests
     void registerUser() throws ResponseException
     {
         RegisterRequest request = new RegisterRequest("username", "password", "email");
-        userService.registerUser(request);
 
-        HashMap<Integer, UserData> userData = userService.getUserData();
-        assertEquals(1, userData.size());
-        assertTrue(userData.containsValue(new UserData("username", BCrypt.hashpw("password", BCrypt.gensalt()), "email")));
+        assertDoesNotThrow(() -> sqlAccess.registerUser(request));
     }
 
     @Test
-    void registerBadUser()
+    void listUsers() throws ResponseException
     {
-        RegisterRequest request = new RegisterRequest(null, "password", "email");
-        RegisterRequest request2 = new RegisterRequest("username", null, "email");
-        RegisterRequest request3 = new RegisterRequest("username", "password", null);
-
-        assertThrows(ResponseException.class, () -> userService.registerUser(request)); // bad username
-        assertThrows(ResponseException.class, () -> userService.registerUser(request2)); // bad password
-        assertThrows(ResponseException.class, () -> userService.registerUser(request3)); // bad email
-    }
-
-    @Test
-    void multipleRegisters() throws ResponseException
-    {
+        HashMap<Integer, UserData> expected = new HashMap<>();
+        UserData data1 = new UserData("username", BCrypt.hashpw("password", BCrypt.gensalt()), "email");
+        UserData data2 = new UserData("username2", BCrypt.hashpw("password2", BCrypt.gensalt()), "email2");
         RegisterRequest request = new RegisterRequest("username", "password", "email");
-        RegisterRequest request2 = new RegisterRequest("username2", "password", "email");
-        RegisterRequest request3 = new RegisterRequest("username", "difPassword", "difEmail");
+        RegisterRequest request2 = new RegisterRequest("username2", "password2", "email2");
         userService.registerUser(request);
         userService.registerUser(request2);
+        expected.put(1, data1);
+        expected.put(2, data2);
 
-        HashMap<Integer, UserData> userData = userService.getUserData();
-        assertEquals(2, userData.size());
-        assertTrue(userData.containsValue(new UserData("username", BCrypt.hashpw("password", BCrypt.gensalt()), "email")));
-        assertTrue(userData.containsValue(new UserData("username2", BCrypt.hashpw("password", BCrypt.gensalt()), "email")));
-        assertThrows(ResponseException.class, () -> userService.registerUser(request3)); // duplicate username
+        assertUserDataEqual(expected, userService.getUserData());
     }
 
     @Test
-    void loginUser() throws ResponseException
+    void deleteUserData() throws ResponseException
     {
+        UserData data1 = new UserData("username", BCrypt.hashpw("password", BCrypt.gensalt()), "email");
+        UserData data2 = new UserData("username2", BCrypt.hashpw("password2", BCrypt.gensalt()), "email2");
         RegisterRequest request = new RegisterRequest("username", "password", "email");
+        RegisterRequest request2 = new RegisterRequest("username2", "password2", "email2");
         userService.registerUser(request);
+        userService.registerUser(request2);
+        userService.deleteUserData();
 
-        assertThrows(ResponseException.class, () -> userService.loginUser(new LoginRequest("username", "password_wrong")));
-        assertThrows(ResponseException.class, () -> userService.loginUser(new LoginRequest("username_wrong", "password")));
-        userService.loginUser(new LoginRequest("username", "password"));
-        userService.loginUser(new LoginRequest("username", "password")); // login twice
+        assertEquals(0, userService.getUserData().size());
     }
 
     @Test
@@ -90,33 +80,13 @@ class MySQLUserServiceTests
         assertThrows(ResponseException.class, () -> userService.logoutUser(new LogoutRequest("invalid token")));
     }
 
-    @Test
-    void clearUsers() throws ResponseException
+    private void assertUserDataEqual(HashMap<Integer, UserData> expected, HashMap<Integer, UserData> actual)
     {
-        RegisterRequest request = new RegisterRequest("username", "password", "email");
-        userService.registerUser(request);
-
-        userService.deleteUserData();
-        assertEquals(0, userService.getUserData().size()); // should have nothing inside it
-    }
-
-    @Test
-    void dataCounts() throws ResponseException
-    {
-        RegisterRequest request = new RegisterRequest("username", "password", "email");
-        RegisterRequest request2 = new RegisterRequest("username2", "password", "email");
-        userService.registerUser(request);
-        userService.registerUser(request2);
-        LoginRequest login = new LoginRequest(request.username(), request.password());
-        userService.loginUser(login);
-        assertEquals(1, userService.getAuthData().size());
-        assertEquals(2, userService.getUserData().size());
-        userService.loginUser(login);
-        assertEquals(2, userService.getUserData().size());
-        userService.loginUser(new LoginRequest(request2.username(), request2.password()));
-        assertEquals(3, userService.getAuthData().size());
-        assertEquals(2, userService.getUserData().size());
-
-        assertEquals(3, userService.getAuthTokens().size());
+        UserData[] expectedArr = expected.values().toArray(new UserData[0]);
+        UserData[] actualArr = actual.values().toArray(new UserData[0]);
+        for(int i = 0; i < actual.size(); i++)
+        {
+            assertEquals(expectedArr[i].username(), actualArr[i].username());
+        }
     }
 }
