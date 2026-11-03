@@ -3,9 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exceptions.ResponseException;
-import io.javalin.http.Context;
 import model.*;
-import org.eclipse.jetty.server.QuietServletException;
 import org.mindrot.jbcrypt.BCrypt;
 import requests.*;
 import results.LoginResult;
@@ -82,8 +80,7 @@ public class MySqlDataAccess implements DataAccess
         if(isAuthorized(token))
         {
             String statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameData) VALUES (?, ?, ?, ?)";
-            int id = updateDatabase(statement, data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
-            return id;
+            return updateDatabase(statement, data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
         }
         return -1;
     }
@@ -146,7 +143,7 @@ public class MySqlDataAccess implements DataAccess
                 throw new ResponseException(403, "Error: already taken");
             }
             String username = findUsernameByAuthToken(token);
-            gameData = gameData.addPlayer(color, username);
+            gameData.addPlayer(color, username);
             String statement = "UPDATE games SET ";
             if(color.equals("BLACK"))
             {
@@ -220,7 +217,6 @@ public class MySqlDataAccess implements DataAccess
                 {
                     while (resultSet.next())
                     {
-                        int id = resultSet.getInt("id");
                         String authToken = resultSet.getString("authToken");
                         String username = resultSet.getString("username");
                         allAuthData.add(new AuthData(authToken, username));
@@ -448,26 +444,5 @@ public class MySqlDataAccess implements DataAccess
         throw new ResponseException(401, "Error: unauthorized");
     }
 
-    private int getLatestGameID() throws ResponseException {
-        try(Connection connection = DatabaseManager.getConnection())
-        {
-            String statement = "SELECT LAST_INSERT_ID(`id`) FROM games";
-            try(PreparedStatement prepared = connection.prepareStatement(statement))
-            {
-                try(ResultSet resultSet = prepared.executeQuery())
-                {
-                    if(resultSet.next())
-                    {
-                        return resultSet.getInt("id");
-                    }
-                }
-            }
-        } catch (Exception ex)
-        {
-            throw new ResponseException(500, "Error: Internal Server Error");
-        }
-        return -1;
-    }
-
-    private String randomToken() { return UUID.randomUUID().toString(); };
+    private String randomToken() { return UUID.randomUUID().toString(); }
 }

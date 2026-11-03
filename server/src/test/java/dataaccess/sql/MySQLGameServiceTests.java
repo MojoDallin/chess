@@ -1,6 +1,5 @@
 package dataaccess.sql;
 
-import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import exceptions.ResponseException;
 import model.GameData;
