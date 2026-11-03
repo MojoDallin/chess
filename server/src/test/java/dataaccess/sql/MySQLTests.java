@@ -1,7 +1,6 @@
 package dataaccess.sql;
 
 import dataaccess.DataAccess;
-import dataaccess.MySqlDataAccess;
 import exceptions.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,17 +13,16 @@ import results.LoginResult;
 import service.UserService;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class MySQLUserServiceTests
+class MySQLTests
 {
     DataAccess sqlAccess = new MySqlDataAccess();
     final UserService userService = new UserService(sqlAccess);
 
-    MySQLUserServiceTests() throws ResponseException {}
+    MySQLTests() throws ResponseException {}
 
     @BeforeEach
     void clear() throws ResponseException { userService.deleteUserData(); }

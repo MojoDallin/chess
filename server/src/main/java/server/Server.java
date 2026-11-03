@@ -1,14 +1,12 @@
 package server;
 
 import dataaccess.DataAccess;
-import dataaccess.DatabaseManager;
 import dataaccess.MemoryDataAccess;
-import dataaccess.MySqlDataAccess;
+import dataaccess.sql.MySqlDataAccess;
 import exceptions.ResponseException;
 import io.javalin.*;
 import io.javalin.http.Context;
 import com.google.gson.Gson;
-import model.AuthData;
 import model.GameData;
 import model.JoinData;
 import model.UserData;
@@ -20,13 +18,8 @@ import results.LoginResult;
 import service.GameService;
 import service.UserService;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 
 public class Server {
 

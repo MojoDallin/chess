@@ -1,7 +1,8 @@
-package dataaccess;
+package dataaccess.sql;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
 import exceptions.ResponseException;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
