@@ -81,7 +81,8 @@ public class MySqlDataAccess implements DataAccess
         if(isAuthorized(token))
         {
             String statement = "INSERT INTO games (whiteUsername, blackUsername, gameName, gameData) VALUES (?, ?, ?, ?)";
-            return updateDatabase(statement, data.whiteUsername(), data.blackUsername(), data.gameName(), data.game());
+            String json = new Gson().toJson(data.game());
+            return updateDatabase(statement, data.whiteUsername(), data.blackUsername(), data.gameName(), json);
         }
         return -1;
     }
@@ -140,7 +141,7 @@ public class MySqlDataAccess implements DataAccess
             if ((whiteTaken && color.equals("WHITE")) || (blackTaken && color.equals("BLACK"))) {
                 throw new ResponseException(403, "Error: already taken");
             }
-            String username = findUsernameByAuthToken(token);
+            String username = request.username();
             gameData.addPlayer(color, username);
             String statement = "UPDATE games SET ";
             if(color.equals("BLACK"))
