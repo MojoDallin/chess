@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import exceptions.ResponseException;
 import io.javalin.http.Context;
 import model.*;
+import org.eclipse.jetty.server.QuietServletException;
 import org.mindrot.jbcrypt.BCrypt;
 import requests.*;
 import results.LoginResult;
@@ -179,18 +180,83 @@ public class MySqlDataAccess implements DataAccess
     }
 
     @Override
-    public HashMap<Integer, UserData> getUsers() {
-        return null;
+    public HashMap<Integer, UserData> getUsers()
+    {
+        HashMap<Integer, UserData> allUsers = new HashMap<>();
+        try (Connection connection = DatabaseManager.getConnection())
+        {
+            String statement = "SELECT * FROM users";
+            try (PreparedStatement prepared = connection.prepareStatement(statement))
+            {
+                try (ResultSet resultSet = prepared.executeQuery())
+                {
+                    while (resultSet.next())
+                    {
+                        int id = resultSet.getInt("id");
+                        String username = resultSet.getString("username");
+                        String password = resultSet.getString("password");
+                        String email = resultSet.getString("email");
+                        allUsers.put(id, new UserData(username, password, email));
+                    }
+                }
+            }
+        } catch (Exception ex)
+        {
+            return null;
+        }
+        return allUsers;
     }
 
     @Override
-    public HashSet<AuthData> getAuthData() {
-        return null;
+    public HashSet<AuthData> getAuthData()
+    {
+        HashSet<AuthData> allAuthData = new HashSet<>();
+        try (Connection connection = DatabaseManager.getConnection())
+        {
+            String statement = "SELECT * FROM authdata";
+            try (PreparedStatement prepared = connection.prepareStatement(statement))
+            {
+                try (ResultSet resultSet = prepared.executeQuery())
+                {
+                    while (resultSet.next())
+                    {
+                        int id = resultSet.getInt("id");
+                        String authToken = resultSet.getString("authToken");
+                        String username = resultSet.getString("username");
+                        allAuthData.add(new AuthData(authToken, username));
+                    }
+                }
+            }
+        } catch (Exception ex)
+        {
+            return null;
+        }
+        return allAuthData;
     }
 
     @Override
-    public HashSet<String> getAuthTokens() {
-        return null;
+    public HashSet<String> getAuthTokens()
+    {
+        HashSet<String> allAuthTokens = new HashSet<>();
+        try (Connection connection = DatabaseManager.getConnection())
+        {
+            String statement = "SELECT authToken FROM authdata";
+            try (PreparedStatement prepared = connection.prepareStatement(statement))
+            {
+                try (ResultSet resultSet = prepared.executeQuery())
+                {
+                    while (resultSet.next())
+                    {
+                        String token = resultSet.getString("authToken");
+                        allAuthTokens.add(token);
+                    }
+                }
+            }
+        } catch (Exception ex)
+        {
+            return null;
+        }
+        return allAuthTokens;
     }
 
     private int updateDatabase(String statement, Object...params) throws ResponseException
