@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 
 public class ServerFacade
 {
@@ -22,14 +23,21 @@ public class ServerFacade
         HttpRequest httpRequest = createRequest("POST", "/user", registerRequest);
         HttpResponse<String> response = sendRequest(httpRequest);
         LoginResult loginResult = handleResponse(response, LoginResult.class);
-        return loginResult;
-        //return loginUser(new LoginRequest(loginResult.username(), registerRequest.password()));
+        return loginUser(new LoginRequest(loginResult.username(), registerRequest.password()));
     }
 
-//    public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException
-//    {
-//
-//    }
+    public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException
+    {
+        HttpRequest httpRequest = createRequest("POST", "/session", loginRequest);
+        HttpResponse<String> response = sendRequest(httpRequest);
+        return handleResponse(response, LoginResult.class);
+    }
+
+    public void deleteAllData() throws ResponseException
+    {
+        HttpRequest httpRequest = createRequest("DELETE", "/db", null);
+        sendRequest(httpRequest);
+    }
 
     private HttpRequest createRequest(String method, String path, Object body)
     {
@@ -78,7 +86,7 @@ public class ServerFacade
         {
             throw new ResponseException(500, "Error: " + response.statusCode());
         }
-        throw new ResponseException(999, "not implemented yet");
+        throw new ResponseException(500, new Gson().fromJson(body, HashMap.class).get("message").toString());
     }
 
     private boolean wasSuccessful(int status)

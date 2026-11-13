@@ -23,6 +23,12 @@ public class ServerFacadeTests {
         facade = new ServerFacade(port);
     }
 
+    @BeforeEach
+    void clear() throws ResponseException
+    {
+        facade.deleteAllData();
+    }
+
     @AfterAll
     static void stopServer() {
         server.stop();
