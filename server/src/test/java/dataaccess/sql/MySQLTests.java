@@ -1,9 +1,6 @@
 package dataaccess.sql;
 
 import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
-import chess.InvalidMoveException;
 import dataaccess.DataAccess;
 import exceptions.ResponseException;
 import model.GameData;

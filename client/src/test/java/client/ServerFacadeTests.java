@@ -1,18 +1,26 @@
 package client;
 
+import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
+import requests.RegisterRequest;
+import results.LoginResult;
 import server.Server;
+import server.ServerFacade;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ServerFacadeTests {
 
     private static Server server;
+    private static ServerFacade facade;
 
     @BeforeAll
     public static void init() {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        facade = new ServerFacade(port);
     }
 
     @AfterAll
@@ -20,10 +28,15 @@ public class ServerFacadeTests {
         server.stop();
     }
 
-
     @Test
     public void sampleTest() {
-        Assertions.assertTrue(true);
+        assertTrue(true);
     }
 
+    @Test
+    void registerUser() throws ResponseException
+    {
+        LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
+        assertTrue(result.authToken().length() > 10);
+    }
 }

@@ -3,7 +3,6 @@ package dataaccess;
 import exceptions.ResponseException;
 import model.AuthData;
 import model.GameData;
-import model.JoinData;
 import model.UserData;
 import results.*;
 import requests.*;
