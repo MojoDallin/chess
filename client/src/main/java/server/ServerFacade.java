@@ -20,7 +20,7 @@ public class ServerFacade
 
     public LoginResult registerUser(RegisterRequest registerRequest) throws ResponseException
     {
-        HttpRequest httpRequest = createRequest("POST", "/user", registerRequest);
+        HttpRequest httpRequest = createRequest("POST", "/user", registerRequest, null);
         HttpResponse<String> response = sendRequest(httpRequest);
         LoginResult loginResult = handleResponse(response, LoginResult.class);
         return loginUser(new LoginRequest(loginResult.username(), registerRequest.password()));
@@ -28,22 +28,37 @@ public class ServerFacade
 
     public LoginResult loginUser(LoginRequest loginRequest) throws ResponseException
     {
-        HttpRequest httpRequest = createRequest("POST", "/session", loginRequest);
+        HttpRequest httpRequest = createRequest("POST", "/session", loginRequest, null);
         HttpResponse<String> response = sendRequest(httpRequest);
         return handleResponse(response, LoginResult.class);
     }
 
     public void deleteAllData() throws ResponseException
     {
-        HttpRequest httpRequest = createRequest("DELETE", "/db", null);
+        HttpRequest httpRequest = createRequest("DELETE", "/db", null, null);
         sendRequest(httpRequest);
     }
 
-    private HttpRequest createRequest(String method, String path, Object body)
+    public boolean logoutUser(LogoutRequest logoutRequest) throws ResponseException
+    {
+        HttpRequest httpRequest = createRequest("DELETE", "/session", logoutRequest, logoutRequest.authToken());
+        HttpResponse<String> response = sendRequest(httpRequest);
+        if(wasSuccessful(response.statusCode()))
+        {
+            return true;
+        }
+        throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
+    }
+
+    private HttpRequest createRequest(String method, String path, Object body, String token)
     {
         HttpRequest.Builder req = HttpRequest.newBuilder()
                 .uri(URI.create(url + path))
                 .method(method, convertBody(body));
+        if(token != null)
+        {
+            req.header("authorization", token);
+        }
         if(body != null)
         {
             req.setHeader("Content-Type", "application/json");
@@ -86,11 +101,12 @@ public class ServerFacade
         {
             throw new ResponseException(500, "Error: " + response.statusCode());
         }
-        throw new ResponseException(500, new Gson().fromJson(body, HashMap.class).get("message").toString());
+        throw new ResponseException(500, getBodyMessage(body));
     }
 
     private boolean wasSuccessful(int status)
     {
         return status / 100 == 2;
     }
+    private String getBodyMessage(String body) { return new Gson().fromJson(body, HashMap.class).get("message").toString(); }
 }

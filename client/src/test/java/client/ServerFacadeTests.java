@@ -2,6 +2,7 @@ package client;
 
 import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
 import server.Server;
@@ -44,5 +45,13 @@ public class ServerFacadeTests {
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         assertTrue(result.authToken().length() > 10);
+    }
+
+    @Test
+    void logoutUser() throws ResponseException
+    {
+        LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
+        boolean wasLoggedOut = facade.logoutUser(new LogoutRequest(result.authToken()));
+        assertTrue(wasLoggedOut);
     }
 }
