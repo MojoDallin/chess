@@ -2,7 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import exceptions.ResponseException;
-import model.GameData;
+import model.*;
 import requests.*;
 import results.*;
 
@@ -10,6 +10,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class ServerFacade
@@ -51,13 +53,15 @@ public class ServerFacade
         throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
 
-    public HashMap<Integer, GameData> listGames(String authToken) throws ResponseException
+    public ArrayList<GameData> listGames(String authToken) throws ResponseException
     {
         HttpRequest httpRequest = createRequest("GET", "/game", null, authToken);
         HttpResponse<String> response = sendRequest(httpRequest);
         if(wasSuccessful(response.statusCode()))
         {
-            return handleResponse(response, HashMap.class);
+            //Object allGames = new Gson().fromJson(response.body(), GameListResult.class).get("games"); // only accepted type is Object
+            GameListResult allGames = handleResponse(response, GameListResult.class);
+            return (ArrayList<GameData>) allGames.games(); // cast for proper return time
         }
         throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
@@ -72,6 +76,17 @@ public class ServerFacade
             return data.gameID();
         }
         throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
+    }
+
+    public void joinGame(JoinData joinData, String authToken) throws ResponseException
+    {
+        HttpRequest httpRequest = createRequest("PUT", "/game", joinData, authToken);
+        HttpResponse<String> response = sendRequest(httpRequest);
+        if(wasSuccessful(response.statusCode()))
+        {
+
+        }
+        //throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
 
     private HttpRequest createRequest(String method, String path, Object body, String token)

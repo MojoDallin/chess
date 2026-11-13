@@ -3,6 +3,7 @@ package client;
 import chess.ChessGame;
 import exceptions.ResponseException;
 import model.GameData;
+import model.JoinData;
 import org.junit.jupiter.api.*;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
@@ -10,7 +11,9 @@ import results.LoginResult;
 import server.Server;
 import server.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,6 +74,23 @@ public class ServerFacadeTests {
     void listGames() throws ResponseException
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
-        HashMap<Integer, GameData> games = facade.listGames(result.authToken());
+        int id1 = facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
+        int id2 = facade.createGame(new GameData(99, "whiteUsername2", "blackUsername2", "name2", new ChessGame()), result.authToken());
+        ArrayList<GameData> games = facade.listGames(result.authToken());
+        assertEquals(2, games.size());
     }
+
+    @Test
+    void joinGame() throws ResponseException
+    {
+        LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
+        LoginResult result2 = facade.registerUser(new RegisterRequest("blackUsername", "password", "email"));
+        int id = facade.createGame(new GameData(99, "whiteUsername", null, "name", new ChessGame()), result.authToken());
+        ArrayList<GameData> allGames = facade.listGames(result.authToken());
+        assertNull(allGames.getFirst().blackUsername());
+        facade.joinGame(new JoinData("BLACK", 1), result2.authToken());
+        allGames = facade.listGames(result.authToken());
+        assertEquals("blackUsername", allGames.getFirst().blackUsername());
+    }
+
 }
