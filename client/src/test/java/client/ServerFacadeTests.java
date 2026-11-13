@@ -1,12 +1,15 @@
 package client;
 
 import exceptions.ResponseException;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
 import results.LoginResult;
 import server.Server;
 import server.ServerFacade;
+
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,5 +56,12 @@ public class ServerFacadeTests {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         boolean wasLoggedOut = facade.logoutUser(new LogoutRequest(result.authToken()));
         assertTrue(wasLoggedOut);
+    }
+
+    @Test
+    void listGames() throws ResponseException
+    {
+        LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
+        HashMap<Integer, GameData> games = facade.listGames(result.authToken());
     }
 }

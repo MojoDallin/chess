@@ -2,8 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 import exceptions.ResponseException;
+import model.GameData;
 import requests.*;
 import results.*;
+import service.GameService;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -46,6 +48,17 @@ public class ServerFacade
         if(wasSuccessful(response.statusCode()))
         {
             return true;
+        }
+        throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
+    }
+
+    public HashMap<Integer, GameData> listGames(String authToken) throws ResponseException
+    {
+        HttpRequest httpRequest = createRequest("GET", "/game", null, authToken);
+        HttpResponse<String> response = sendRequest(httpRequest);
+        if(wasSuccessful(response.statusCode()))
+        {
+            return handleResponse(response, HashMap.class);
         }
         throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
