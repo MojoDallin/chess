@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
 import model.GameData;
 import org.junit.jupiter.api.*;
@@ -56,6 +57,14 @@ public class ServerFacadeTests {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         boolean wasLoggedOut = facade.logoutUser(new LogoutRequest(result.authToken()));
         assertTrue(wasLoggedOut);
+    }
+
+    @Test
+    void createGame() throws ResponseException
+    {
+        LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
+        int id = facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
+        assertEquals(id, 1);
     }
 
     @Test

@@ -5,7 +5,6 @@ import exceptions.ResponseException;
 import model.GameData;
 import requests.*;
 import results.*;
-import service.GameService;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -59,6 +58,18 @@ public class ServerFacade
         if(wasSuccessful(response.statusCode()))
         {
             return handleResponse(response, HashMap.class);
+        }
+        throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
+    }
+
+    public int createGame(GameData gameData, String authToken) throws ResponseException
+    {
+        HttpRequest httpRequest = createRequest("POST", "/game", gameData, authToken);
+        HttpResponse<String> response = sendRequest(httpRequest);
+        if(wasSuccessful(response.statusCode()))
+        {
+            GameData data = handleResponse(response, GameData.class);
+            return data.gameID();
         }
         throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
