@@ -7,6 +7,7 @@ import requests.*;
 import results.*;
 import server.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -53,6 +54,7 @@ public class ChessClient
         statement = params[0].toLowerCase(); // ignore case
         switch(statement)
         {
+            case "list" -> listGames();
             case "create" -> createGame(params[1]);
             case "logout" -> logoutUser();
             case "login" -> loginUser(params);
@@ -110,6 +112,24 @@ public class ChessClient
         if(isLoggedIn())
         {
             server.createGame(new GameData(99, null, null, name, new ChessGame()), authToken);
+        }
+        else
+        {
+            throw new ResponseException(500, "Error: not logged in");
+        }
+    }
+
+    private void listGames() throws ResponseException
+    {
+        if(isLoggedIn())
+        {
+            ArrayList<GameData> allGames = server.listGames(authToken);
+            for(int i = 0; i < allGames.size(); i++)
+            {
+                System.out.print(SET_TEXT_COLOR_BLUE);
+                System.out.println((i + 1) + ": " + allGames.get(i));
+                System.out.print(RESET_TEXT_COLOR);
+            }
         }
         else
         {

@@ -28,4 +28,27 @@ public record GameData(int gameID, String whiteUsername, String blackUsername, S
         }
         return new GameData(gameID, whiteUsername, username, gameName, game);
     }
+
+    @Override
+    public String toString()
+    {
+        String returnString = "Game '" + gameName + "'";
+        if(whiteUsername == null)
+        {
+            returnString += " with available white player and";
+        }
+        else
+        {
+            returnString += " with white player " + whiteUsername + " and";
+        }
+        if(blackUsername == null)
+        {
+            returnString += " with available black player ";
+        }
+        else
+        {
+            returnString += " with black player " + blackUsername;
+        }
+        return returnString;
+    }
 }
