@@ -12,11 +12,8 @@ import server.Server;
 import server.ServerFacade;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 public class ServerFacadeTests {
 

@@ -1,7 +1,8 @@
 package client;
 
-public enum State {
+public enum State
+{
     SIGNED_OUT,
     LOGGED_IN,
-    QUIT
+    QUIT;
 }
