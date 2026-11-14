@@ -1,6 +1,8 @@
 package client;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
+import model.GameData;
 import requests.*;
 import results.*;
 import server.ServerFacade;
@@ -51,6 +53,7 @@ public class ChessClient
         statement = params[0].toLowerCase(); // ignore case
         switch(statement)
         {
+            case "create" -> createGame(params[1]);
             case "logout" -> logoutUser();
             case "login" -> loginUser(params);
             case "register" -> registerUser(params);
@@ -95,6 +98,18 @@ public class ChessClient
            server.logoutUser(new LogoutRequest(authToken));
            authToken = "";
            curState = State.SIGNED_OUT;
+        }
+        else
+        {
+            throw new ResponseException(500, "Error: not logged in");
+        }
+    }
+
+    private void createGame(String name) throws ResponseException
+    {
+        if(isLoggedIn())
+        {
+            server.createGame(new GameData(99, null, null, name, new ChessGame()), authToken);
         }
         else
         {
