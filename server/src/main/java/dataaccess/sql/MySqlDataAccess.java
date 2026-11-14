@@ -139,7 +139,7 @@ public class MySqlDataAccess implements DataAccess
             boolean whiteTaken = gameData.whiteUsername() != null;
             boolean blackTaken = gameData.blackUsername() != null;
             if ((whiteTaken && color.equals("WHITE")) || (blackTaken && color.equals("BLACK"))) {
-                throw new ResponseException(403, "Error: already taken");
+                throw new ResponseException(403, "Error: color already taken");
             }
             String username = findUsernameByAuthToken(token);
             gameData.addPlayer(color, username);

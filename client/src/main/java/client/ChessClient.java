@@ -3,11 +3,13 @@ package client;
 import chess.ChessGame;
 import exceptions.ResponseException;
 import model.GameData;
+import model.JoinData;
 import requests.*;
 import results.*;
 import server.ServerFacade;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -54,6 +56,7 @@ public class ChessClient
         statement = params[0].toLowerCase(); // ignore case
         switch(statement)
         {
+            case "join" -> joinGame(params[2], params[1]); // subtract 1 to account for zero-indexing
             case "list" -> listGames();
             case "create" -> createGame(params[1]);
             case "logout" -> logoutUser();
@@ -130,6 +133,35 @@ public class ChessClient
                 System.out.println((i + 1) + ": " + allGames.get(i));
                 System.out.print(RESET_TEXT_COLOR);
             }
+        }
+        else
+        {
+            throw new ResponseException(500, "Error: not logged in");
+        }
+    }
+
+    private void joinGame(String color, String id) throws ResponseException
+    {
+        if(isLoggedIn())
+        {
+            try
+            {
+                Integer.parseInt(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ResponseException(500, "Error: invalid game ID " + id);
+            }
+            color = color.toLowerCase(); // ignore case
+            if(!Objects.equals(color, "white") && !Objects.equals(color, "black"))
+            {
+                throw new ResponseException(500, "Error: invalid color " + color);
+            }
+            if(server.listGames(authToken).size() < Integer.parseInt(id) || Integer.parseInt(id) < 1)
+            {
+                throw new ResponseException(500, "Error: game ID out of bounds");
+            }
+            server.joinGame(new JoinData(color.toUpperCase(), Integer.parseInt(id)), authToken);
         }
         else
         {

@@ -81,11 +81,10 @@ public class ServerFacade
     {
         HttpRequest httpRequest = createRequest("PUT", "/game", joinData, authToken);
         HttpResponse<String> response = sendRequest(httpRequest);
-        if(wasSuccessful(response.statusCode()))
+        if(!wasSuccessful(response.statusCode()))
         {
-
+            throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
         }
-        //throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
 
     private HttpRequest createRequest(String method, String path, Object body, String token)
