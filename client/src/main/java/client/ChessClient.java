@@ -1,6 +1,9 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exceptions.ResponseException;
 import model.GameData;
 import model.JoinData;
@@ -21,6 +24,7 @@ public class ChessClient
     private State curState = State.SIGNED_OUT;
     private final String CROWN = "👑";
     private String authToken;
+    private final char[] letters = {'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
 
     public ChessClient(ServerFacade server)
     {
@@ -56,6 +60,7 @@ public class ChessClient
         statement = params[0].toLowerCase(); // ignore case
         switch(statement)
         {
+            case "observe" -> observeGame(params[1]);
             case "join" -> joinGame(params[2], params[1]); // subtract 1 to account for zero-indexing
             case "list" -> listGames();
             case "create" -> createGame(params[1]);
@@ -161,12 +166,22 @@ public class ChessClient
             {
                 throw new ResponseException(500, "Error: game ID out of bounds");
             }
-            server.joinGame(new JoinData(color.toUpperCase(), Integer.parseInt(id)), authToken);
+            boolean wasSuccessful = server.joinGame(new JoinData(color.toUpperCase(), Integer.parseInt(id)), authToken);
+            if(wasSuccessful)
+            {
+                drawChessBoard(server.listGames(authToken).get(Integer.parseInt(id) - 1).game(), color);
+            }
         }
         else
         {
             throw new ResponseException(500, "Error: not logged in");
         }
+    }
+
+    private void observeGame(String id) throws ResponseException
+    {
+        GameData data = server.listGames(authToken).get(Integer.parseInt(id) - 1);
+        drawChessBoard(data.game(), "white"); // default is from white's perspective
     }
 
     private void printHelp()
@@ -186,6 +201,83 @@ public class ChessClient
         }
         System.out.println("- quit: Exits the program. Have a good day!");
         System.out.println("- help: Prints these messages. Changes depending on if you're logged in or not.");
+    }
+
+    private void drawChessBoard(ChessGame boardData, String color)
+    {
+        ChessBoard board = boardData.getBoard();
+        String[] colorSequences = {SET_TEXT_COLOR_BLUE, SET_TEXT_COLOR_RED};
+        if(Objects.equals(color, "white"))
+        {
+            colorSequences[0] = SET_TEXT_COLOR_RED; // colors change depending on perspective
+            colorSequences[1] = SET_TEXT_COLOR_BLUE;
+        }
+        for(int i = 0; i < 10; i++)
+        {
+            if(i == 0 || i == 9)
+            {
+                System.out.print("    ");
+            }
+            for(int j = 0; j < 10; j++)
+            {
+                int extraSpaces = 2;
+                if(i == 0 || i == 9)
+                {
+                    if(j > 0 && j < 9)
+                    {
+                        System.out.print(letters[j - 1]);
+                    }
+                }
+                else
+                {
+                    if(j > 0 && j < 9)
+                    {
+                        ChessPiece piece = board.getPositionAt(i, j).getCurrentPiece();
+                        if((j + i) % 2 == 1)
+                        {
+                            System.out.print(SET_BG_COLOR_BLACK);
+                        }
+                        else
+                        {
+                            System.out.print(SET_BG_COLOR_WHITE);
+                        }
+                        if(piece != null)
+                        {
+                            System.out.print(SET_TEXT_BOLD);
+                            if(piece.getTeamColor() == ChessGame.TeamColor.WHITE)
+                            {
+                                System.out.print(colorSequences[0]);
+                            }
+                            else
+                            {
+                                System.out.print(colorSequences[1]);
+                            }
+                            System.out.print(" ");
+                            extraSpaces--;
+                            String pieceString = piece.toString().toUpperCase();
+                            System.out.print(pieceString);
+                            System.out.print(RESET_TEXT_BOLD_FAINT);
+                            System.out.print(SET_TEXT_COLOR_GREEN);
+                        }
+                        else
+                        {
+                            System.out.print(" ");
+                        }
+                    }
+                    else
+                    {
+                        System.out.print(RESET_BG_COLOR);
+                        System.out.print("  ");
+                        System.out.print(i);
+                    }
+                }
+                for(int k = 0; k < extraSpaces; k++)
+                {
+                    System.out.print(" ");
+                }
+            }
+            System.out.println(); // newline
+        }
     }
 
 private boolean isLoggedIn() { return curState == State.LOGGED_IN; }

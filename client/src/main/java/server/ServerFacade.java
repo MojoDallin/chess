@@ -77,7 +77,7 @@ public class ServerFacade
         throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
     }
 
-    public void joinGame(JoinData joinData, String authToken) throws ResponseException
+    public boolean joinGame(JoinData joinData, String authToken) throws ResponseException
     {
         HttpRequest httpRequest = createRequest("PUT", "/game", joinData, authToken);
         HttpResponse<String> response = sendRequest(httpRequest);
@@ -85,6 +85,7 @@ public class ServerFacade
         {
             throw new ResponseException(response.statusCode(), getBodyMessage(response.body()));
         }
+        return true;
     }
 
     private HttpRequest createRequest(String method, String path, Object body, String token)
