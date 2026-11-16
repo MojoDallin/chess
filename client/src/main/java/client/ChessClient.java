@@ -33,7 +33,7 @@ public class ChessClient
     {
         System.out.println(CROWN + " CS Chess 240: Signed Out " + CROWN);
         System.out.print(SET_TEXT_COLOR_GREEN);
-        printHelp();
+        printHelp(new String[]{""});
         System.out.print(RESET_TEXT_COLOR);
 
         Scanner scanner = new Scanner(System.in);
@@ -58,15 +58,15 @@ public class ChessClient
         statement = params[0].toLowerCase(); // ignore case
         switch(statement)
         {
-            case "observe" -> observeGame(params[1]);
-            case "join" -> joinGame(params[2], params[1]); // subtract 1 to account for zero-indexing
-            case "list" -> listGames();
-            case "create" -> createGame(params[1]);
-            case "logout" -> logoutUser();
+            case "observe" -> observeGame(params);
+            case "join" -> joinGame(params); // subtract 1 to account for zero-indexing
+            case "list" -> listGames(params);
+            case "create" -> createGame(params);
+            case "logout" -> logoutUser(params);
             case "login" -> loginUser(params);
             case "register" -> registerUser(params);
-            case "help" -> printHelp();
-            case "quit" -> curState = State.QUIT;
+            case "help" -> printHelp(params);
+            case "quit" -> { checkParamAmount(0, params); curState = State.QUIT; }
             default -> System.out.println("Input '" + statement + "' not recognized! Please try again.");
         }
     }
@@ -75,6 +75,7 @@ public class ChessClient
     {
         if(!isLoggedIn())
         {
+            checkParamAmount(3, params);
             LoginResult result = server.registerUser(new RegisterRequest(params[1], params[2], params[3]));
             curState = State.LOGGED_IN;
             authToken = result.authToken();
@@ -83,12 +84,14 @@ public class ChessClient
         {
             throw new ResponseException(500, "Error: already logged in");
         }
+        System.out.println("Registered and logged in as: " + params[1]);
     }
 
     private void loginUser(String[] params) throws ResponseException
     {
         if(!isLoggedIn())
         {
+            checkParamAmount(2, params);
             LoginResult result = server.loginUser(new LoginRequest(params[1], params[2]));
             curState = State.LOGGED_IN;
             authToken = result.authToken();
@@ -97,12 +100,14 @@ public class ChessClient
         {
             throw new ResponseException(500, "Error: already logged in");
         }
+        System.out.println("Logged in as: " + params[1]);
     }
 
-    private void logoutUser() throws ResponseException
+    private void logoutUser(String[] params) throws ResponseException
     {
         if(isLoggedIn())
         {
+            checkParamAmount(0, params);
            server.logoutUser(new LogoutRequest(authToken));
            authToken = "";
            curState = State.SIGNED_OUT;
@@ -113,11 +118,12 @@ public class ChessClient
         }
     }
 
-    private void createGame(String name) throws ResponseException
+    private void createGame(String[] params) throws ResponseException
     {
         if(isLoggedIn())
         {
-            server.createGame(new GameData(99, null, null, name, new ChessGame()), authToken);
+            checkParamAmount(1, params);
+            server.createGame(new GameData(99, null, null, params[1], new ChessGame()), authToken);
         }
         else
         {
@@ -125,10 +131,11 @@ public class ChessClient
         }
     }
 
-    private void listGames() throws ResponseException
+    private void listGames(String[] params) throws ResponseException
     {
         if(isLoggedIn())
         {
+            checkParamAmount(0, params);
             ArrayList<GameData> allGames = server.listGames(authToken);
             for(int i = 0; i < allGames.size(); i++)
             {
@@ -143,31 +150,33 @@ public class ChessClient
         }
     }
 
-    private void joinGame(String color, String id) throws ResponseException
+    private void joinGame(String[] params) throws ResponseException
     {
         if(isLoggedIn())
         {
+            checkParamAmount(2, params);
+            int id;
             try
             {
-                Integer.parseInt(id);
+                id = Integer.parseInt(params[1]);
             }
             catch (Exception ex)
             {
-                throw new ResponseException(500, "Error: invalid game ID " + id);
+                throw new ResponseException(500, "Error: invalid game ID " + params[1]);
             }
-            color = color.toLowerCase(); // ignore case
+            String color = params[2].toLowerCase(); // ignore case
             if(!Objects.equals(color, "white") && !Objects.equals(color, "black"))
             {
                 throw new ResponseException(500, "Error: invalid color " + color);
             }
-            if(server.listGames(authToken).size() < Integer.parseInt(id) || Integer.parseInt(id) < 1)
+            if(server.listGames(authToken).size() < id || id < 1)
             {
                 throw new ResponseException(500, "Error: game ID out of bounds");
             }
-            boolean wasSuccessful = server.joinGame(new JoinData(color.toUpperCase(), Integer.parseInt(id)), authToken);
+            boolean wasSuccessful = server.joinGame(new JoinData(color.toUpperCase(), id), authToken);
             if(wasSuccessful)
             {
-                drawChessBoard(server.listGames(authToken).get(Integer.parseInt(id) - 1).game(), color);
+                drawChessBoard(server.listGames(authToken).get(id - 1).game(), color);
             }
         }
         else
@@ -176,14 +185,38 @@ public class ChessClient
         }
     }
 
-    private void observeGame(String id) throws ResponseException
+    private void observeGame(String[] params) throws ResponseException
     {
-        GameData data = server.listGames(authToken).get(Integer.parseInt(id) - 1);
-        drawChessBoard(data.game(), "white"); // default is from white's perspective
+        if(isLoggedIn())
+        {
+            checkParamAmount(1, params);
+            int num;
+            GameData data;
+            try
+            {
+                num = Integer.parseInt(params[1]) - 1;
+            } catch (Exception ex)
+            {
+                throw new ResponseException(500, "Error: invalid game ID " + params[1]);
+            }
+            try
+            {
+                data = server.listGames(authToken).get(num);
+            } catch (Exception ex)
+            {
+                throw new ResponseException(500, "Error: game ID " + (num + 1) + " does not exist");
+            }
+            drawChessBoard(data.game(), "white"); // default is from white's perspective
+        }
+        else
+        {
+            throw new ResponseException(500, "Error: not logged in");
+        }
     }
 
-    private void printHelp()
+    private void printHelp(String[] params) throws ResponseException
     {
+        checkParamAmount(0, params);
         if(!isLoggedIn())
         {
             System.out.println("- register <USERNAME> <PASSWORD> <EMAIL>: Create an account to play!");
@@ -290,6 +323,14 @@ public class ChessClient
             System.out.print(" ");
         }
         return 0;
+    }
+
+    private void checkParamAmount(int required, String[] actual) throws ResponseException
+    {
+        if(required + 1 != actual.length) // add 1 because params[0] is always the statement
+        {
+            throw new ResponseException(500, "Error: invalid number of arguments");
+        }
     }
 
 private boolean isLoggedIn() { return curState == State.LOGGED_IN; }
