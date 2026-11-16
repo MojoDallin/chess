@@ -21,7 +21,7 @@ public class ChessClient
 
     private final ServerFacade server;
     private State curState = State.SIGNED_OUT;
-    private final String CROWN = "👑";
+    private static final String CROWN = "👑";
     private String authToken;
 
     public ChessClient(ServerFacade server)
@@ -235,36 +235,8 @@ public class ChessClient
                     if(j > 0 && j < 9)
                     {
                         ChessPiece piece = board.getPositionAt(i, j).getCurrentPiece();
-                        if((j + i) % 2 == 1)
-                        {
-                            System.out.print(SET_BG_COLOR_BLACK);
-                        }
-                        else
-                        {
-                            System.out.print(SET_BG_COLOR_WHITE);
-                        }
-                        if(piece != null)
-                        {
-                            System.out.print(SET_TEXT_BOLD);
-                            if(piece.getTeamColor() == ChessGame.TeamColor.WHITE)
-                            {
-                                System.out.print(colorSequences[0]);
-                            }
-                            else
-                            {
-                                System.out.print(colorSequences[1]);
-                            }
-                            System.out.print(" ");
-                            extraSpaces--;
-                            String pieceString = piece.toString().toUpperCase();
-                            System.out.print(pieceString);
-                            System.out.print(RESET_TEXT_BOLD_FAINT);
-                            System.out.print(SET_TEXT_COLOR_GREEN);
-                        }
-                        else
-                        {
-                            System.out.print(" ");
-                        }
+                        printBGColor(j + i);
+                        extraSpaces -= printPiece(piece, colorSequences); // proper offsets
                     }
                     else
                     {
@@ -280,6 +252,44 @@ public class ChessClient
             }
             System.out.println(); // newline
         }
+    }
+
+    private void printBGColor(int num)
+    {
+        if(num % 2 == 1)
+        {
+            System.out.print(SET_BG_COLOR_BLACK);
+        }
+        else
+        {
+            System.out.print(SET_BG_COLOR_WHITE);
+        }
+    }
+
+    private int printPiece(ChessPiece piece, String[] colors)
+    {
+        if(piece != null)
+        {
+            System.out.print(SET_TEXT_BOLD);
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE)
+            {
+                System.out.print(colors[0]);
+            } else
+            {
+                System.out.print(colors[1]);
+            }
+            System.out.print(" ");
+            String pieceString = piece.toString().toUpperCase();
+            System.out.print(pieceString);
+            System.out.print(RESET_TEXT_BOLD_FAINT);
+            System.out.print(SET_TEXT_COLOR_GREEN);
+            return 1;
+        }
+        else
+        {
+            System.out.print(" ");
+        }
+        return 0;
     }
 
 private boolean isLoggedIn() { return curState == State.LOGGED_IN; }
