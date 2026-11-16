@@ -82,6 +82,9 @@ public class ServerFacadeTests {
         facade.createGame(new GameData(99, "whiteUsername2", "blackUsername2", "name2", new ChessGame()), result.authToken());
         games = facade.listGames(result.authToken());
         assertEquals(2, games.size());
+        assertThrows(ResponseException.class, () -> facade.createGame(new GameData(97, null, null, null, null), result.authToken()));
+        games = facade.listGames(result.authToken());
+        assertEquals(2, games.size());
     }
 
     @Test
@@ -95,6 +98,8 @@ public class ServerFacadeTests {
         facade.joinGame(new JoinData("BLACK", 1), result2.authToken());
         allGames = facade.listGames(result.authToken());
         assertEquals("blackUsername", allGames.getFirst().blackUsername());
+        assertThrows(ResponseException.class, () -> facade.joinGame(new JoinData("BLACK", 1), result.authToken()));
+        assertThrows(ResponseException.class, () -> facade.joinGame(new JoinData("WHITE", 1), result.authToken()));
     }
 
 }
