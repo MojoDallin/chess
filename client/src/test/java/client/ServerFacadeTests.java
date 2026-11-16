@@ -48,6 +48,7 @@ public class ServerFacadeTests {
     void registerUser() throws ResponseException
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
+        assertThrows(ResponseException.class, () -> facade.registerUser(new RegisterRequest("username", "password", "email")));
         assertTrue(result.authToken().length() > 10);
     }
 
@@ -64,15 +65,16 @@ public class ServerFacadeTests {
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         int id = facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
-        assertEquals(id, 1);
+        assertEquals(1, id);
+        assertEquals(1, facade.listGames(result.authToken()).size());
     }
 
     @Test
     void listGames() throws ResponseException
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
-        int id1 = facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
-        int id2 = facade.createGame(new GameData(99, "whiteUsername2", "blackUsername2", "name2", new ChessGame()), result.authToken());
+        facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
+        facade.createGame(new GameData(99, "whiteUsername2", "blackUsername2", "name2", new ChessGame()), result.authToken());
         ArrayList<GameData> games = facade.listGames(result.authToken());
         assertEquals(2, games.size());
     }
@@ -82,7 +84,7 @@ public class ServerFacadeTests {
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         LoginResult result2 = facade.registerUser(new RegisterRequest("blackUsername", "password", "email"));
-        int id = facade.createGame(new GameData(99, "whiteUsername", null, "name", new ChessGame()), result.authToken());
+        facade.createGame(new GameData(99, "whiteUsername", null, "name", new ChessGame()), result.authToken());
         ArrayList<GameData> allGames = facade.listGames(result.authToken());
         assertNull(allGames.getFirst().blackUsername());
         facade.joinGame(new JoinData("BLACK", 1), result2.authToken());
