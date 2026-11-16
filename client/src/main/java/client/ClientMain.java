@@ -2,7 +2,6 @@ package client;
 
 import chess.*;
 import exceptions.ResponseException;
-import server.Server;
 import server.ServerFacade;
 
 public class ClientMain {
@@ -12,8 +11,7 @@ public class ClientMain {
         System.out.println("♕ 240 Chess Client: " + piece);
         try
         {
-            Server server = new Server();
-            int port = server.run(0);
+            int port = 8080;
             new ChessClient(new ServerFacade(port)).signedOutMenu();
         } catch (ResponseException ex)
         {
