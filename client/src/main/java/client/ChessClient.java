@@ -3,6 +3,7 @@ package client;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
+import chess.ChessPosition;
 import exceptions.ResponseException;
 import model.GameData;
 import model.JoinData;
@@ -67,6 +68,7 @@ public class ChessClient
             case "register" -> registerUser(params);
             case "help" -> printHelp(params);
             case "quit" -> { checkParamAmount(0, params); curState = State.QUIT; }
+            case "leave" -> { checkParamAmount(0, params); curState = State.LOGGED_IN; }
             default -> System.out.println("Input '" + statement + "' not recognized! Please try again.");
         }
     }
@@ -243,8 +245,7 @@ public class ChessClient
         byte[] numbers = {8, 7, 6, 5, 4, 3, 2, 1};
         if(Objects.equals(color, "black"))
         {
-            colorSequences[0] = SET_TEXT_COLOR_RED; // colors/letters/numbers change depending on perspective
-            colorSequences[1] = SET_TEXT_COLOR_BLUE;
+            board = rotateBoard(board);
             letters = new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
             numbers = new byte[]{1, 2, 3, 4, 5, 6, 7, 8};
         }
@@ -305,13 +306,7 @@ public class ChessClient
         if(piece != null)
         {
             System.out.print(SET_TEXT_BOLD);
-            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE)
-            {
-                System.out.print(colors[0]);
-            } else
-            {
-                System.out.print(colors[1]);
-            }
+            System.out.print(colors[piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 0 : 1]);
             System.out.print(" ");
             String pieceString = piece.toString().toUpperCase();
             System.out.print(pieceString);
@@ -324,6 +319,21 @@ public class ChessClient
             System.out.print(" ");
         }
         return 0;
+    }
+
+    private ChessBoard rotateBoard(ChessBoard board)
+    {
+        ChessPosition[][] oldPositions = board.getBoardPositions();
+        int len = oldPositions.length;
+        ChessBoard newBoard = new ChessBoard();
+        for(int i = 0; i < len; i++)
+        {
+            for(int j = 0; j < len; j++)
+            {
+                newBoard.getBoardPositions()[i][j] = oldPositions[len - i - 1][len - j - 1];
+            }
+        }
+        return newBoard;
     }
 
     private void checkParamAmount(int required, String[] actual) throws ResponseException
