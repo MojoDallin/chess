@@ -24,7 +24,6 @@ public class ChessClient
     private State curState = State.SIGNED_OUT;
     private final String CROWN = "👑";
     private String authToken;
-    private final char[] letters = {'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
 
     public ChessClient(ServerFacade server)
     {
@@ -207,10 +206,14 @@ public class ChessClient
     {
         ChessBoard board = boardData.getBoard();
         String[] colorSequences = {SET_TEXT_COLOR_BLUE, SET_TEXT_COLOR_RED};
-        if(Objects.equals(color, "white"))
+        char[] letters = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        byte[] numbers = {8, 7, 6, 5, 4, 3, 2, 1};
+        if(Objects.equals(color, "black"))
         {
-            colorSequences[0] = SET_TEXT_COLOR_RED; // colors change depending on perspective
+            colorSequences[0] = SET_TEXT_COLOR_RED; // colors/letters/numbers change depending on perspective
             colorSequences[1] = SET_TEXT_COLOR_BLUE;
+            letters = new char[]{'h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'};
+            numbers = new byte[]{1, 2, 3, 4, 5, 6, 7, 8};
         }
         for(int i = 0; i < 10; i++)
         {
@@ -268,7 +271,7 @@ public class ChessClient
                     {
                         System.out.print(RESET_BG_COLOR);
                         System.out.print("  ");
-                        System.out.print(i);
+                        System.out.print(numbers[i - 1]);
                     }
                 }
                 for(int k = 0; k < extraSpaces; k++)
