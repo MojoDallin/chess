@@ -4,5 +4,6 @@ public enum State
 {
     SIGNED_OUT,
     LOGGED_IN,
-    QUIT;
+    QUIT,
+    IN_GAME
 }

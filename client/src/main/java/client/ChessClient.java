@@ -176,6 +176,7 @@ public class ChessClient
             boolean wasSuccessful = server.joinGame(new JoinData(color.toUpperCase(), id), authToken);
             if(wasSuccessful)
             {
+                curState = State.IN_GAME;
                 drawChessBoard(server.listGames(authToken).get(id - 1).game(), color);
             }
         }
@@ -231,7 +232,7 @@ public class ChessClient
             System.out.println("- logout: Logs you out.");
         }
         System.out.println("- quit: Exits the program. Have a good day!");
-        System.out.println("- help: Prints these messages. Changes depending on if you're logged in or not.");
+        System.out.println("- help: Prints these messages. Changes depending on if you're logged in or not, or currently in a game.");
     }
 
     private void drawChessBoard(ChessGame boardData, String color)
