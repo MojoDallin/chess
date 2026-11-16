@@ -49,6 +49,7 @@ public class ServerFacadeTests {
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         assertThrows(ResponseException.class, () -> facade.registerUser(new RegisterRequest("username", "password", "email")));
+        assertThrows(ResponseException.class, () -> facade.registerUser(new RegisterRequest("username2", null, null)));
         assertTrue(result.authToken().length() > 10);
     }
 
@@ -58,6 +59,7 @@ public class ServerFacadeTests {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         boolean wasLoggedOut = facade.logoutUser(new LogoutRequest(result.authToken()));
         assertTrue(wasLoggedOut);
+        assertThrows(ResponseException.class, () -> facade.logoutUser(new LogoutRequest(result.authToken())));
     }
 
     @Test
@@ -65,6 +67,7 @@ public class ServerFacadeTests {
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         int id = facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
+        assertThrows(ResponseException.class, () -> facade.createGame(new GameData(98, null, null, null, null), result.authToken()));
         assertEquals(1, id);
         assertEquals(1, facade.listGames(result.authToken()).size());
     }
@@ -74,8 +77,10 @@ public class ServerFacadeTests {
     {
         LoginResult result = facade.registerUser(new RegisterRequest("username", "password", "email"));
         facade.createGame(new GameData(99, "whiteUsername", "blackUsername", "name", new ChessGame()), result.authToken());
-        facade.createGame(new GameData(99, "whiteUsername2", "blackUsername2", "name2", new ChessGame()), result.authToken());
         ArrayList<GameData> games = facade.listGames(result.authToken());
+        assertEquals(1, games.size());
+        facade.createGame(new GameData(99, "whiteUsername2", "blackUsername2", "name2", new ChessGame()), result.authToken());
+        games = facade.listGames(result.authToken());
         assertEquals(2, games.size());
     }
 
